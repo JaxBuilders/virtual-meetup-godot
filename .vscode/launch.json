@@ -3,44 +3,47 @@
   "configurations": [
     {
       "name": "Virtual Meetup: Godot Editor",
-      "type": "node",
+      "type": "node-terminal",
       "request": "launch",
-      "runtimeExecutable": "node",
-      "program": "${workspaceFolder}/dev/dev.mjs",
-      "args": ["editor"],
-      "console": "integratedTerminal"
+      "cwd": "${workspaceFolder}",
+      "command": "node dev/dev.mjs editor"
     },
     {
       "name": "Virtual Meetup: MCP Server",
-      "type": "node",
+      "type": "node-terminal",
       "request": "launch",
-      "program": "${workspaceFolder}/dev/mcp/launch-server.mjs",
-      "console": "integratedTerminal"
+      "cwd": "${workspaceFolder}",
+      "command": "node dev/mcp/launch-server.mjs",
+      "presentation": {
+        "hidden": true
+      }
     },
     {
       "name": "Virtual Meetup: Headless MCP Editor",
-      "type": "node",
+      "type": "node-terminal",
       "request": "launch",
-      "runtimeExecutable": "node",
-      "program": "${workspaceFolder}/dev/dev.mjs",
-      "args": ["start"],
-      "console": "integratedTerminal"
+      "cwd": "${workspaceFolder}",
+      "command": "node dev/dev.mjs start",
+      "presentation": {
+        "hidden": true
+      }
     },
     {
       "name": "Virtual Meetup: Project Map Request",
-      "type": "node",
+      "type": "node-terminal",
       "request": "launch",
-      "program": "${workspaceFolder}/dev/map-project.mjs",
-      "console": "integratedTerminal"
+      "cwd": "${workspaceFolder}",
+      "command": "node dev/map-project.mjs res:// --open --wait-for-workspace --stay-alive",
+      "presentation": {
+        "hidden": true
+      }
     },
     {
       "name": "Virtual Meetup: Tests",
-      "type": "node",
+      "type": "node-terminal",
       "request": "launch",
-      "runtimeExecutable": "node",
-      "program": "${workspaceFolder}/dev/dev.mjs",
-      "args": ["game-headless", "res://tests/test_runner.tscn"],
-      "console": "integratedTerminal"
+      "cwd": "${workspaceFolder}",
+      "command": "node dev/dev.mjs game-headless res://tests/test_runner.tscn"
     }
   ],
   "compounds": [
