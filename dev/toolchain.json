@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "node": {
+    "minimumMajor": 22,
+    "supportedLtsMajors": [22, 24]
+  },
+  "godot": {
+    "version": "4.7.1",
+    "versionOutput": "4.7.1.stable.official.a13da4feb",
+    "artifacts": {
+      "windows-x86_64": {
+        "url": "https://github.com/godotengine/godot/releases/download/4.7.1-stable/Godot_v4.7.1-stable_win64.exe.zip",
+        "archiveName": "Godot_v4.7.1-stable_win64.exe.zip",
+        "sha512": "a6b02c527c18ba9936e63562032701432b2dc57d98d6483ceaccb00fe14af16af5773ae8a55e7b4d614edf121c4d9e420d870f804edb1dac16362298a01ce6c4",
+        "members": {
+          "editor": "Godot_v4.7.1-stable_win64.exe",
+          "console": "Godot_v4.7.1-stable_win64_console.exe"
+        },
+        "executables": {
+          "editor": "godot.exe",
+          "console": "godot_console.exe"
+        }
+      },
+      "linux-x86_64": {
+        "url": "https://github.com/godotengine/godot/releases/download/4.7.1-stable/Godot_v4.7.1-stable_linux.x86_64.zip",
+        "archiveName": "Godot_v4.7.1-stable_linux.x86_64.zip",
+        "sha512": "4ccdab7a48eeccbe8819a2fc1f6262f8d72065d98601bcb3743fcbd7ebd39f373758a788ee3293a05ec5b2c48538266c437404312e372225cd2df273945a2de9",
+        "members": {
+          "editor": "Godot_v4.7.1-stable_linux.x86_64",
+          "console": "Godot_v4.7.1-stable_linux.x86_64"
+        },
+        "executables": {
+          "editor": "godot",
+          "console": "godot"
+        }
+      }
+    }
+  },
+  "mcp": {
+    "package": "godot-mcp-server",
+    "version": "0.5.0",
+    "integrity": "sha512-ZRYtA2fGytPZAdwKb1/JqIud3A/MUoKnlQpWnqpcKqybkY7hYHVo9r6nMuiIO33Ny/hqWaQZ8itTzZgaS8FjHw==",
+    "entry": "node_modules/godot-mcp-server/dist/index.js",
+    "bridgePort": 6505,
+    "proxyPort": 6506,
+    "visualizerPort": 6510
+  }
+}

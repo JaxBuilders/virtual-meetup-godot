@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="AvatarDescriptor" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/avatar_descriptor.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+body_id = &"body_compact"
+skin_id = &"skin_amber"
+hair_id = &"hair_crop"
+outfit_id = &"outfit_teal"
+accessory_id = &"none"

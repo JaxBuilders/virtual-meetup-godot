@@ -1,0 +1,9 @@
+{
+  "name": "virtual-meetup-local-godot-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pinned local MCP server for Virtual Meetup development.",
+  "dependencies": {
+    "godot-mcp-server": "0.5.0"
+  }
+}

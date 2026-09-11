@@ -1,0 +1,58 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Virtual Meetup: Godot Editor",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "node",
+      "program": "${workspaceFolder}/dev/dev.mjs",
+      "args": ["editor"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Virtual Meetup: MCP Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/dev/mcp/launch-server.mjs",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Virtual Meetup: Headless MCP Editor",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "node",
+      "program": "${workspaceFolder}/dev/dev.mjs",
+      "args": ["start"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Virtual Meetup: Project Map Request",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/dev/map-project.mjs",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Virtual Meetup: Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "node",
+      "program": "${workspaceFolder}/dev/dev.mjs",
+      "args": ["game-headless", "res://tests/test_runner.tscn"],
+      "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Virtual Meetup: MCP Workspace",
+      "configurations": ["Virtual Meetup: MCP Server", "Virtual Meetup: Headless MCP Editor"],
+      "stopAll": true
+    },
+    {
+      "name": "Virtual Meetup: Project Map",
+      "configurations": ["Virtual Meetup: MCP Server", "Virtual Meetup: Headless MCP Editor", "Virtual Meetup: Project Map Request"],
+      "stopAll": true
+    }
+  ]
+}

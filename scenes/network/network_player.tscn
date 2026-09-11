@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1"]
+
+[node name="NetworkPlayer" type="CharacterBody3D"]
+script = ExtResource("1")
+collision_layer = 2
+collision_mask = 5
+
+[node name="Replicator" type="FusionSharedReplicator" parent="."]
+owner_mode = 1
+root_path = NodePath("..")
+root_replication_mode = 1
+root_global_coordinates = true
+root_smoothing = true
+root_interpolation_mode = 1
+root_snapshot_delay = 1
+root_teleport_threshold = 3.0
