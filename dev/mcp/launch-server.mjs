@@ -1,5 +1,5 @@
 import { createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, rmSync } from "node:fs";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -9,20 +9,29 @@ const toolchain = JSON.parse(readFileSync(path.join(repositoryRoot, "dev", "tool
 const serverEntry = path.join(scriptDirectory, ...toolchain.mcp.entry.split("/"));
 const installedManifest = path.join(scriptDirectory, "node_modules", toolchain.mcp.package, "package.json");
 
-if (!existsSync(serverEntry) || !existsSync(installedManifest)) {
-  process.stderr.write(
-    "Virtual Meetup Godot MCP is not installed. Run `node dev/dev.mjs bootstrap`, then restart Codex.\n",
-  );
-  process.exit(1);
+function installationReady() {
+  try {
+    const manifest = JSON.parse(readFileSync(installedManifest, "utf8"));
+    const visualizer = readFileSync(path.join(path.dirname(installedManifest), "dist", "visualizer-server.js"), "utf8");
+    return existsSync(serverEntry) && manifest.version === toolchain.mcp.version
+      && visualizer.includes("GODOT_MCP_OPEN_BROWSER === '1'");
+  } catch {
+    return false;
+  }
 }
 
-const installedPackage = JSON.parse(readFileSync(installedManifest, "utf8"));
-if (installedPackage.version !== toolchain.mcp.version) {
-  process.stderr.write(
-    `Virtual Meetup requires ${toolchain.mcp.package}@${toolchain.mcp.version}, but ${installedPackage.version} is installed. `
-      + "Run `node dev/dev.mjs bootstrap --force`, then restart Codex.\n",
-  );
-  process.exit(1);
+if (!installationReady()) {
+  process.stderr.write(`Preparing ${toolchain.mcp.package}@${toolchain.mcp.version} for first launch...\n`);
+  const setup = spawnSync(process.execPath, [path.join(repositoryRoot, "dev", "dev.mjs"), "bootstrap", "--mcp-only"], {
+    cwd: repositoryRoot,
+    // stdout belongs to MCP's JSON-RPC protocol; setup messages go to stderr.
+    stdio: ["ignore", 2, 2],
+    windowsHide: true,
+  });
+  if (setup.error || setup.status !== 0 || !installationReady()) {
+    process.stderr.write(`MCP setup failed${setup.error ? `: ${setup.error.message}` : "; see setup output above"}.\n`);
+    process.exit(1);
+  }
 }
 
 const logDirectory = path.join(repositoryRoot, ".dev", "logs");

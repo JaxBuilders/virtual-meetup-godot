@@ -128,8 +128,16 @@ async function remainActive() {
   }
   process.stdout.write("Project map is active. Stop this launch to shut down its workspace.\n");
   await new Promise((resolve) => {
-    process.once("SIGINT", resolve);
-    process.once("SIGTERM", resolve);
+    // Signal listeners do not keep Node's event loop alive on their own.
+    const keepAlive = setInterval(() => {}, 1000);
+    const stop = () => {
+      clearInterval(keepAlive);
+      process.removeListener("SIGINT", stop);
+      process.removeListener("SIGTERM", stop);
+      resolve();
+    };
+    process.once("SIGINT", stop);
+    process.once("SIGTERM", stop);
   });
 }
 
@@ -146,8 +154,11 @@ function openBrowser(url) {
 
 try {
   const major = Number.parseInt(process.versions.node.split(".")[0], 10);
+  if (major < toolchain.node.minimumMajor) {
+    fail(`Node ${toolchain.node.minimumMajor} or newer is required; found ${process.versions.node}.`);
+  }
   if (!toolchain.node.supportedLtsMajors.includes(major)) {
-    fail(`Use Node ${toolchain.node.supportedLtsMajors.join(" or ")} LTS.`);
+    process.stderr.write(`WARNING: Node ${process.versions.node} is outside the recommended LTS majors ${toolchain.node.supportedLtsMajors.join(", ")}; continuing with this installed version.\n`);
   }
   if (!root.startsWith("res://") || root.includes("..")) {
     fail("The project-map root must be a safe res:// path.");
@@ -176,7 +187,7 @@ try {
   await remainActive();
 } catch (error) {
   process.stderr.write(
-    `ERROR: ${error.message}\nStart "Virtual Meetup: MCP Workspace" first, then retry the project map.\n`,
+    `ERROR: ${error.message}\nFor a complete workspace, launch "Virtual Meetup: Godot Editor Headless + Project Map" or "Virtual Meetup: All".\n`,
   );
   process.exitCode = 1;
 }

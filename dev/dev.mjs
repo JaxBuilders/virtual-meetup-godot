@@ -94,9 +94,9 @@ function nodeVersionCheck() {
     );
   }
   if (!toolchain.node.supportedLtsMajors.includes(major)) {
-    fail(
-      `Node ${process.versions.node} is not one of the pinned LTS majors `
-        + `${toolchain.node.supportedLtsMajors.join(", ")}.`,
+    warn(
+      `Node ${process.versions.node} is outside the recommended LTS majors `
+        + `${toolchain.node.supportedLtsMajors.join(", ")}; continuing with this installed version.`,
     );
   }
   return process.versions.node;
@@ -312,10 +312,8 @@ async function installedGodotVersion() {
 async function requireGodot() {
   const version = await installedGodotVersion();
   if (version !== toolchain.godot.versionOutput) {
-    fail(
-      `Verified Godot ${toolchain.godot.version} is not installed. `
-        + "Run `node dev/dev.mjs bootstrap` first.",
-    );
+    print(`Preparing pinned Godot ${toolchain.godot.version} for launch...`);
+    await installGodot(false);
   }
   return godotExecutable("console");
 }
@@ -397,13 +395,24 @@ async function checkProject() {
   );
 }
 
-async function bootstrap(force) {
+async function bootstrap(force, mcpOnly = false) {
   nodeVersionCheck();
+  if (mcpOnly) {
+    await installMcp(force);
+    return;
+  }
+  await installMcp(force);
+  await installGodot(force);
+  await importProject();
+  await checkProject();
+  await doctor(false);
+  print("Bootstrap complete. Start the shared editor with `node dev/dev.mjs start`.");
+}
+
+async function installGodot(force) {
   const { artifact } = artifactForHost();
   await mkdir(toolsRoot, { recursive: true });
   await mkdir(developmentRoot, { recursive: true });
-  await installMcp(force);
-
   const override = String(process.env.GODOT_BIN ?? "").trim();
   const installDirectory = godotInstallDirectory();
   const currentVersion = await installedGodotVersion();
@@ -422,10 +431,6 @@ async function bootstrap(force) {
   if (installedVersion !== toolchain.godot.versionOutput) {
     fail(`Installed Godot reported '${installedVersion ?? "no version"}'.`);
   }
-  await importProject();
-  await checkProject();
-  await doctor(false);
-  print("Bootstrap complete. Start the shared editor with `node dev/dev.mjs start`.");
 }
 
 async function isPortOpen(port) {
@@ -609,7 +614,7 @@ async function writeState(child, executable, mode, logPath) {
 async function runPersistentEditor(mode) {
   nodeVersionCheck();
   await requireGodot();
-  await verifyMcpInstall();
+  // The editor uses the bundled plugin; the separate server launcher owns npm setup.
   await removeStaleState();
   const current = await healthyOwnedState();
   if (current) {
@@ -881,6 +886,7 @@ function usage() {
   print("");
   print("Commands:");
   print("  bootstrap [--force]       Install pinned tools, import, check, and diagnose");
+  print("    --mcp-only              Install/repair only the pinned MCP dependencies");
   print("  doctor [--mcp]            Diagnose local tools and optional live MCP state");
   print("  map-project [root]        Serve the MCP project map; add --open for a browser");
   print("  start                     Run the shared headless MCP editor");
@@ -895,7 +901,7 @@ function usage() {
 try {
   switch (command) {
     case "bootstrap":
-      await bootstrap(commandArguments.includes("--force"));
+      await bootstrap(commandArguments.includes("--force"), commandArguments.includes("--mcp-only"));
       break;
     case "doctor":
       await doctor(commandArguments.includes("--mcp"));

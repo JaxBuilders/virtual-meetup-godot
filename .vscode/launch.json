@@ -6,16 +6,22 @@
       "type": "node-terminal",
       "request": "launch",
       "cwd": "${workspaceFolder}",
-      "command": "node dev/dev.mjs editor"
+      "command": "env -u NODE_OPTIONS -u VSCODE_INSPECTOR_OPTIONS node dev/dev.mjs editor",
+      "windows": {
+        "command": "cmd /d /s /c \"set NODE_OPTIONS=& set VSCODE_INSPECTOR_OPTIONS=& node dev/dev.mjs editor\""
+      }
     },
     {
       "name": "Virtual Meetup: MCP Server",
       "type": "node-terminal",
       "request": "launch",
       "cwd": "${workspaceFolder}",
-      "command": "node dev/mcp/launch-server.mjs",
       "presentation": {
         "hidden": true
+      },
+      "command": "env -u NODE_OPTIONS -u VSCODE_INSPECTOR_OPTIONS node dev/mcp/launch-server.mjs",
+      "windows": {
+        "command": "cmd /d /s /c \"set NODE_OPTIONS=& set VSCODE_INSPECTOR_OPTIONS=& node dev/mcp/launch-server.mjs\""
       }
     },
     {
@@ -23,9 +29,12 @@
       "type": "node-terminal",
       "request": "launch",
       "cwd": "${workspaceFolder}",
-      "command": "node dev/dev.mjs start",
       "presentation": {
         "hidden": true
+      },
+      "command": "env -u NODE_OPTIONS -u VSCODE_INSPECTOR_OPTIONS node dev/dev.mjs start",
+      "windows": {
+        "command": "cmd /d /s /c \"set NODE_OPTIONS=& set VSCODE_INSPECTOR_OPTIONS=& node dev/dev.mjs start\""
       }
     },
     {
@@ -33,28 +42,40 @@
       "type": "node-terminal",
       "request": "launch",
       "cwd": "${workspaceFolder}",
-      "command": "node dev/map-project.mjs res:// --open --wait-for-workspace --stay-alive",
       "presentation": {
         "hidden": true
+      },
+      "command": "env -u NODE_OPTIONS -u VSCODE_INSPECTOR_OPTIONS node dev/map-project.mjs res:// --open --wait-for-workspace --stay-alive",
+      "windows": {
+        "command": "cmd /d /s /c \"set NODE_OPTIONS=& set VSCODE_INSPECTOR_OPTIONS=& node dev/map-project.mjs res:// --open --wait-for-workspace --stay-alive\""
       }
-    },
-    {
-      "name": "Virtual Meetup: Tests",
-      "type": "node-terminal",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "command": "node dev/dev.mjs game-headless res://tests/test_runner.tscn"
     }
   ],
   "compounds": [
     {
-      "name": "Virtual Meetup: MCP Workspace",
-      "configurations": ["Virtual Meetup: MCP Server", "Virtual Meetup: Headless MCP Editor"],
+      "name": "Virtual Meetup: Godot Editor Headless",
+      "configurations": [
+        "Virtual Meetup: MCP Server",
+        "Virtual Meetup: Headless MCP Editor"
+      ],
       "stopAll": true
     },
     {
-      "name": "Virtual Meetup: Project Map",
-      "configurations": ["Virtual Meetup: MCP Server", "Virtual Meetup: Headless MCP Editor", "Virtual Meetup: Project Map Request"],
+      "name": "Virtual Meetup: Godot Editor Headless + Project Map",
+      "configurations": [
+        "Virtual Meetup: MCP Server",
+        "Virtual Meetup: Headless MCP Editor",
+        "Virtual Meetup: Project Map Request"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "Virtual Meetup: All",
+      "configurations": [
+        "Virtual Meetup: MCP Server",
+        "Virtual Meetup: Godot Editor",
+        "Virtual Meetup: Project Map Request"
+      ],
       "stopAll": true
     }
   ]
