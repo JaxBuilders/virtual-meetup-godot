@@ -26,3 +26,5 @@ VIRTUAL_MEETUP_FUSION_APP_ID=
 An empty value is valid and leaves online actions unavailable. The identifier is never copied from MegaDart or BB-Godot.
 
 Avatar authoring uses Blender 4.5 LTS and MPFB2 2.0.15 outside the game repository. Set `BLENDER_BIN` or put Blender on `PATH`. MPFB2 is not installed by the development harness.
+
+Launch **Virtual Meetup: Blender** in VS Code to open the installed Blender. The harness uses `BLENDER_BIN` first, then `blender` on `PATH`, and reports the actual version without replacing your installation. `node dev/dev.mjs blender --check` verifies discovery without opening a window; `node dev/dev.mjs blender path/to/avatar.blend` opens a source file. Paths containing spaces must be quoted. This launcher is separate from the Godot **All** compound. It sets `DISABLE_TELEMETRY=true` for Blender MCP if installed; it does not install or enable Blender MCP or MPFB. Those integrations still need version selection and setup. The documented Blender 4.5/MPFB baseline is not a claim that newer installed Blender versions have been validated.

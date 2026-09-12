@@ -7,3 +7,13 @@ tool_timeout_sec = 60
 enabled = true
 required = false
 default_tools_approval_mode = "writes"
+
+[mcp_servers.virtual_meetup_blender]
+command = "node"
+args = ["dev/blender_mcp.mjs"]
+cwd = "."
+startup_timeout_sec = 60
+tool_timeout_sec = 120
+enabled = true
+required = false
+default_tools_approval_mode = "writes"

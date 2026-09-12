@@ -2,6 +2,26 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Virtual Meetup: Blender + MCP + MPFB",
+      "type": "node-terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "command": "env -u NODE_OPTIONS -u VSCODE_INSPECTOR_OPTIONS node dev/dev.mjs blender --authoring",
+      "windows": {
+        "command": "cmd /d /s /c \"set NODE_OPTIONS=& set VSCODE_INSPECTOR_OPTIONS=& node dev/dev.mjs blender --authoring\""
+      }
+    },
+    {
+      "name": "Virtual Meetup: Blender",
+      "type": "node-terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "command": "env -u NODE_OPTIONS -u VSCODE_INSPECTOR_OPTIONS node dev/dev.mjs blender",
+      "windows": {
+        "command": "cmd /d /s /c \"set NODE_OPTIONS=& set VSCODE_INSPECTOR_OPTIONS=& node dev/dev.mjs blender\""
+      }
+    },
+    {
       "name": "Virtual Meetup: Godot Editor",
       "type": "node-terminal",
       "request": "launch",

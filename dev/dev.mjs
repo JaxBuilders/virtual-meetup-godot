@@ -879,6 +879,38 @@ async function mapProject(args) {
   );
 }
 
+async function launchBlender(args) {
+  const authoring = args.includes("--authoring");
+  args = args.filter((arg) => arg !== "--authoring");
+  const override = String(process.env.BLENDER_BIN ?? "").trim();
+  const executable = override || "blender";
+  const probe = spawnSync(executable, ["--version"], { encoding: "utf8", windowsHide: true });
+  if (probe.error || probe.status !== 0 || !probe.stdout.startsWith("Blender ")) {
+    fail("Blender could not be started. Install Blender and put it on PATH, or set BLENDER_BIN to its executable (without arguments).");
+  }
+  print(probe.stdout.split(/\r?\n/)[0]);
+  if (args.includes("--check")) return;
+  if (args.length > 1 || (args.length && !args[0].toLowerCase().endsWith(".blend"))) {
+    fail("Usage: node dev/dev.mjs blender [file.blend | --check]");
+  }
+  const files = args.length ? [path.resolve(repositoryRoot, args[0])] : [];
+  if (files.length && !(await pathExists(files[0]))) fail("The selected .blend file does not exist.");
+  await new Promise((resolve, reject) => {
+    const launchArgs = authoring ? [...files, "--python", path.join(repositoryRoot, "dev", "blender_startup.py")] : files;
+    const child = spawn(executable, launchArgs, {
+      cwd: repositoryRoot,
+      env: { ...process.env, DISABLE_TELEMETRY: "true" },
+      stdio: "inherit",
+      windowsHide: false,
+    });
+    child.once("error", reject);
+    child.once("close", (code, signal) => {
+      if (code === 0) resolve();
+      else reject(new Error(`Blender exited with ${signal ?? code}.`));
+    });
+  });
+}
+
 function usage() {
   print("Virtual Meetup repo-local Godot development harness");
   print("");
@@ -891,6 +923,7 @@ function usage() {
   print("  map-project [root]        Serve the MCP project map; add --open for a browser");
   print("  start                     Run the shared headless MCP editor");
   print("  editor                    Run the visible pinned editor");
+  print("  blender [file.blend]       Open Blender; --check verifies discovery only");
   print("  import                    Import project assets headlessly and exit");
   print("  check                     Load first-party scripts/scenes/resources and exit");
   print("  game-headless [scene]     Run a bounded headless scene smoke test");
@@ -914,6 +947,9 @@ try {
       break;
     case "editor":
       await runPersistentEditor("editor");
+      break;
+    case "blender":
+      await launchBlender(commandArguments);
       break;
     case "import":
       nodeVersionCheck();
