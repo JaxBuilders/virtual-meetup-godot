@@ -17,13 +17,47 @@ The VS Code MCP Server entry and `node dev/mcp/launch-server.mjs` automatically 
 
 VS Code launch entries use shell commands that clear NODE_OPTIONS and VSCODE_INSPECTOR_OPTIONS before starting Node, preventing injected JavaScript debugger attachment. This also clears any custom Node options for these development launches. Setup diagnostics use stderr so the same MCP launcher also works with stdio clients.
 
-For online room development, create a Fusion 3 application specifically for Virtual Meetup and expose its identifier only in your local environment:
+## Online room setup
+
+Online rooms use the bundled Photon Fusion snapshot when it is available and when a local Virtual Meetup Fusion App ID is provided. Offline play is still the default fallback and must keep working without credentials.
+
+Create a Photon Fusion 3 application specifically for Virtual Meetup, then expose only its App ID in your local shell environment. Do not copy application IDs from sibling projects and do not commit real IDs, credentials, or local config files.
+
+PowerShell:
+
+```powershell
+$env:VIRTUAL_MEETUP_FUSION_APP_ID = "your-fusion-app-id"
+node dev/dev.mjs editor
+```
+
+Git Bash or Linux shell:
+
+```bash
+export VIRTUAL_MEETUP_FUSION_APP_ID="your-fusion-app-id"
+node dev/dev.mjs editor
+```
+
+An empty value is valid and leaves online actions unavailable:
 
 ```text
 VIRTUAL_MEETUP_FUSION_APP_ID=
 ```
 
-An empty value is valid and leaves online actions unavailable. The identifier is never copied from MegaDart or BB-Godot.
+The repository ignores `.env`, `.env.*`, and `.envrc` for local notes or shell tooling, but the Godot harness reads the process environment. Set or source the variable in the shell that launches Godot.
+
+To verify online availability:
+
+1. Start the editor or game from a shell where `VIRTUAL_MEETUP_FUSION_APP_ID` is set.
+2. Create a local profile if one does not exist.
+3. Use the home screen's online create action for a supported region such as `us`.
+4. Confirm the status reaches `Connected to <REGION-CODE>` and the room HUD shows the invite code.
+5. For a two-client check, launch a second client with the same environment variable and join with that code.
+
+To verify offline fallback:
+
+1. Start from a shell where `VIRTUAL_MEETUP_FUSION_APP_ID` is unset or empty.
+2. Confirm **Play Offline** enters the clubhouse.
+3. Confirm online create or join reports that online rooms need `VIRTUAL_MEETUP_FUSION_APP_ID` instead of blocking offline play.
 
 Avatar authoring uses Blender 4.5 LTS and MPFB2 2.0.15 outside the game repository. Set `BLENDER_BIN` or put Blender on `PATH`. MPFB2 is not installed by the development harness.
 
