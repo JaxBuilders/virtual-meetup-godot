@@ -1,5 +1,7 @@
 extends Node
 
+const TEST_COUNT := 16
+
 var failures: PackedStringArray = []
 
 
@@ -17,14 +19,18 @@ func _ready() -> void:
 	await get_tree().process_frame
 	_test_runtime_nodes()
 	await get_tree().process_frame
-	await _test_offline_flow()
+	await _test_offline_room_bootstrap()
+	await _test_offline_chat_loop()
+	await _test_offline_emote_loop()
+	await _test_offline_interaction_loop()
+	await _test_offline_leave_loop()
 	if failures.is_empty():
-		print("VIRTUAL_MEETUP_TESTS passed=12 failed=0")
+		print("VIRTUAL_MEETUP_TESTS passed=%d failed=0" % TEST_COUNT)
 		get_tree().quit(0)
 	else:
 		for failure in failures:
 			push_error(failure)
-		print("VIRTUAL_MEETUP_TESTS passed=%d failed=%d" % [12 - failures.size(), failures.size()])
+		print("VIRTUAL_MEETUP_TESTS passed=%d failed=%d" % [TEST_COUNT - failures.size(), failures.size()])
 		get_tree().quit(1)
 
 
@@ -142,15 +148,77 @@ func _test_runtime_nodes() -> void:
 	clubhouse.queue_free()
 
 
-func _test_offline_flow() -> void:
+func _test_offline_room_bootstrap() -> void:
+	var app := await _spawn_offline_app()
+	_expect(app.state == AppController.AppState.LOCAL_ROOM, "Offline action should enter the local clubhouse.")
+	_expect(app.active_session is OfflineSessionTransport, "Offline flow should use the offline transport.")
+	_expect(app.room_root != null and app.room_root.get_node_or_null("Venue") is Clubhouse, "Offline room should create the clubhouse venue.")
+	_expect(app.player != null and app.player.name == "LocalPlayer", "Offline room should create a local player.")
+	_expect(app.hud != null and app.hud.code_label.text == "Room: OFFLINE", "Offline room should create a HUD with the offline room code.")
+	_expect(app.hud != null and app.hud._participant_rows.has(1), "Offline HUD should show the local participant row.")
+	await _destroy_app(app)
+
+
+func _test_offline_chat_loop() -> void:
+	var app := await _spawn_offline_app()
+	app.hud.chat_submitted.emit("  hello clubhouse  ")
+	await get_tree().process_frame
+	var chat_text := app.hud.chat_log.get_parsed_text()
+	_expect(chat_text.contains(ProfileStore.current_profile.display_name), "Offline chat should use the local profile display name.")
+	_expect(chat_text.contains("hello clubhouse"), "Offline chat should append the sanitized local message to the HUD.")
+	await _destroy_app(app)
+
+
+func _test_offline_emote_loop() -> void:
+	var app := await _spawn_offline_app()
+	app.hud.emote_selected.emit(&"wave")
+	await get_tree().process_frame
+	_expect(app.player.avatar_visual._active_emote == &"wave", "Offline HUD emote selection should play on the local avatar.")
+	await _destroy_app(app)
+
+
+func _test_offline_interaction_loop() -> void:
+	var app := await _spawn_offline_app()
+	var venue := app.room_root.get_node_or_null("Venue") as Clubhouse
+	var seat := venue.get_node_or_null("Seat0") as MeetupSeat if venue != null else null
+	_expect(seat != null, "Offline clubhouse should expose a seat interaction.")
+	if seat != null:
+		seat.interact(app.player)
+		await get_tree().process_frame
+		_expect(app.player.seated_at != null, "Offline player should be able to sit through an interaction.")
+		_expect(seat.get_interaction_prompt(app.player) == "E  Stand", "Occupied local seat should prompt the player to stand.")
+		seat.interact(app.player)
+		await get_tree().process_frame
+		_expect(app.player.seated_at == null, "Offline player should be able to stand through the same interaction.")
+	await _destroy_app(app)
+
+
+func _test_offline_leave_loop() -> void:
+	var app := await _spawn_offline_app()
+	app.hud.leave_requested.emit()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_expect(app.state == AppController.AppState.HOME, "Offline leave should return to the home state.")
+	_expect(app.home_screen != null, "Offline leave should recreate the home screen.")
+	_expect(app.active_session == null, "Offline leave should clear the active session.")
+	_expect(app.player == null and app.hud == null and app.room_root == null, "Offline leave should clear room-only nodes.")
+	await _destroy_app(app)
+
+
+func _spawn_offline_app() -> AppController:
 	var app := AppController.new()
 	add_child(app)
 	await get_tree().process_frame
 	app.call("_start_offline")
 	await get_tree().process_frame
-	_expect(app.state == AppController.AppState.LOCAL_ROOM, "Offline action should enter the local clubhouse.")
-	_expect(app.player != null and app.hud != null, "Offline room should create its player and HUD.")
-	app.queue_free()
+	await get_tree().process_frame
+	return app
+
+
+func _destroy_app(app: AppController) -> void:
+	if app != null and is_instance_valid(app):
+		app.queue_free()
+	await get_tree().process_frame
 
 
 func _expect(condition: bool, message: String) -> void:
