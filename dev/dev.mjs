@@ -374,9 +374,9 @@ async function verifyMcpInstall() {
   return installed.version;
 }
 
-async function runGodot(args, logKind) {
+async function runGodot(args, logKind, options = {}) {
   const executable = await requireGodot();
-  return runProcess(executable, args, { logKind });
+  return runProcess(executable, args, { logKind, ...options });
 }
 
 async function importProject() {
@@ -706,9 +706,19 @@ async function runHeadlessGame(args) {
   if (!(await pathExists(localScene))) {
     fail(`Scene does not exist: ${scene}`);
   }
+  let env = process.env;
+  if (scene.startsWith("res://tests/")) {
+    const testUserDataDirectory = path.join(developmentRoot, "test-user-data");
+    await mkdir(testUserDataDirectory, { recursive: true });
+    env = {
+      ...process.env,
+      VIRTUAL_MEETUP_USER_DATA_DIR: testUserDataDirectory,
+    };
+  }
   await runGodot(
     ["--headless", "--path", repositoryRoot, "--quit-after", String(frames), scene],
     "runtime",
+    { env },
   );
 }
 

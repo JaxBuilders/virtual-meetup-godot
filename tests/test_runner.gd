@@ -10,6 +10,7 @@ func _ready() -> void:
 	_test_profile_sanitization()
 	_test_resources()
 	_test_project_configuration()
+	_test_isolated_storage_configuration()
 	_test_network_state_codec()
 	_test_settings_round_trip()
 	_test_profile_round_trip()
@@ -18,12 +19,12 @@ func _ready() -> void:
 	await get_tree().process_frame
 	await _test_offline_flow()
 	if failures.is_empty():
-		print("VIRTUAL_MEETUP_TESTS passed=11 failed=0")
+		print("VIRTUAL_MEETUP_TESTS passed=12 failed=0")
 		get_tree().quit(0)
 	else:
 		for failure in failures:
 			push_error(failure)
-		print("VIRTUAL_MEETUP_TESTS passed=%d failed=%d" % [11 - failures.size(), failures.size()])
+		print("VIRTUAL_MEETUP_TESTS passed=%d failed=%d" % [12 - failures.size(), failures.size()])
 		get_tree().quit(1)
 
 
@@ -72,6 +73,14 @@ func _test_project_configuration() -> void:
 	_expect(exports.load("res://export_presets.cfg") == OK, "Export presets should parse.")
 	_expect(str(exports.get_value("preset.0", "name", "")) == "Linux", "Linux export preset should exist.")
 	_expect(str(exports.get_value("preset.1", "name", "")) == "Windows Desktop", "Windows export preset should exist.")
+
+
+func _test_isolated_storage_configuration() -> void:
+	var isolated_root := OS.get_environment("VIRTUAL_MEETUP_USER_DATA_DIR").strip_edges().replace("\\", "/")
+	if isolated_root.is_empty():
+		return
+	_expect(ProfileStore.profile_path.begins_with(isolated_root), "Profile tests should use isolated storage.")
+	_expect(SettingsStore.settings_path.begins_with(isolated_root), "Settings tests should use isolated storage.")
 
 
 func _test_network_state_codec() -> void:
