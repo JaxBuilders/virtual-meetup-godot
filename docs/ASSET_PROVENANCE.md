@@ -21,3 +21,5 @@ The current clubhouse, primitive avatars, UI, materials, and activity props are 
 - Godot MCP 0.5.0: copied from MegaDart commit `e9d98061751366641c6fa46159be308a8d14abc2`; MIT notice preserved.
 - Photon Fusion for Godot/Core 3.0.0.625: copied from the same commit; Photon SDK terms preserved in `THIRD_PARTY_NOTICES.md`.
 - Development harness: adapted from the same MegaDart commit; project names, scene defaults, and extension checks were changed for Virtual Meetup.
+
+Upgrade policy: follow `docs/VENDOR_SNAPSHOT_POLICY.md` before changing bundled development or networking snapshots.
