@@ -3,19 +3,23 @@ extends Node
 signal profile_changed(profile: LocalProfile)
 
 const SCHEMA_VERSION := 1
-const PROFILE_PATH := "user://profile.cfg"
+const PROFILE_FILE := "profile.cfg"
+const DEFAULT_PROFILE_PATH := "user://profile.cfg"
+const USER_DATA_ENVIRONMENT_VARIABLE := "VIRTUAL_MEETUP_USER_DATA_DIR"
 
 var current_profile: LocalProfile
+var profile_path: String = DEFAULT_PROFILE_PATH
 
 
 func _ready() -> void:
+	_configure_storage_path()
 	load_profile()
 
 
 func load_profile() -> LocalProfile:
 	var profile := LocalProfile.new()
 	var config := ConfigFile.new()
-	if config.load(PROFILE_PATH) == OK:
+	if config.load(profile_path) == OK:
 		profile.profile_id = str(config.get_value("profile", "id", ""))
 		profile.display_name = str(config.get_value("profile", "display_name", LocalProfile.DEFAULT_NAME))
 		profile.avatar = AvatarDescriptor.from_dictionary({
@@ -54,7 +58,16 @@ func save_profile() -> Error:
 	config.set_value("avatar", "hair", str(avatar.hair_id))
 	config.set_value("avatar", "outfit", str(avatar.outfit_id))
 	config.set_value("avatar", "accessory", str(avatar.accessory_id))
-	return config.save(PROFILE_PATH)
+	return config.save(profile_path)
+
+
+func _configure_storage_path() -> void:
+	var override_root := OS.get_environment(USER_DATA_ENVIRONMENT_VARIABLE).strip_edges().replace("\\", "/")
+	if override_root.is_empty():
+		profile_path = DEFAULT_PROFILE_PATH
+		return
+	DirAccess.make_dir_recursive_absolute(override_root)
+	profile_path = override_root.path_join(PROFILE_FILE)
 
 
 func _generate_profile_id() -> String:

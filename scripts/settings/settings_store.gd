@@ -3,22 +3,26 @@ extends Node
 signal settings_changed
 
 const SCHEMA_VERSION := 1
-const SETTINGS_PATH := "user://settings.cfg"
+const SETTINGS_FILE := "settings.cfg"
+const DEFAULT_SETTINGS_PATH := "user://settings.cfg"
+const USER_DATA_ENVIRONMENT_VARIABLE := "VIRTUAL_MEETUP_USER_DATA_DIR"
 
 var mouse_sensitivity: float = 0.0025
 var field_of_view: float = 80.0
 var master_volume: float = 0.75
 var reduced_motion: bool = false
 var text_scale: float = 1.0
+var settings_path: String = DEFAULT_SETTINGS_PATH
 
 
 func _ready() -> void:
+	_configure_storage_path()
 	load_settings()
 
 
 func load_settings() -> void:
 	var config := ConfigFile.new()
-	if config.load(SETTINGS_PATH) == OK:
+	if config.load(settings_path) == OK:
 		mouse_sensitivity = _number(config.get_value("controls", "mouse_sensitivity", mouse_sensitivity), mouse_sensitivity)
 		field_of_view = _number(config.get_value("graphics", "field_of_view", field_of_view), field_of_view)
 		master_volume = _number(config.get_value("audio", "master_volume", master_volume), master_volume)
@@ -62,7 +66,16 @@ func save_settings() -> Error:
 	config.set_value("audio", "master_volume", master_volume)
 	config.set_value("accessibility", "reduced_motion", reduced_motion)
 	config.set_value("accessibility", "text_scale", text_scale)
-	return config.save(SETTINGS_PATH)
+	return config.save(settings_path)
+
+
+func _configure_storage_path() -> void:
+	var override_root := OS.get_environment(USER_DATA_ENVIRONMENT_VARIABLE).strip_edges().replace("\\", "/")
+	if override_root.is_empty():
+		settings_path = DEFAULT_SETTINGS_PATH
+		return
+	DirAccess.make_dir_recursive_absolute(override_root)
+	settings_path = override_root.path_join(SETTINGS_FILE)
 
 
 func _sanitize() -> void:
