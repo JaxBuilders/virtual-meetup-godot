@@ -15,6 +15,7 @@ Local-only instructions belong in `AGENTS_LOCAL.md`. Read it after this file whe
 - Treat `docs/ASSET_CANDIDATES.md` approval as a hard gate before downloading or importing content.
 - Record approved sources, licenses, checksums, transformations, and derived files in `docs/ASSET_PROVENANCE.md`.
 - Preserve third-party notices and do not copy application IDs from sibling projects.
+- Follow `docs/VENDOR_SNAPSHOT_POLICY.md` before changing bundled development or networking snapshots.
 - Finalize edited text with CRLF line endings.
 
 ## Godot and MCP
