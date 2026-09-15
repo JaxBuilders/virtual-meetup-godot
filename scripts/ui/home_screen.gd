@@ -1,6 +1,9 @@
 class_name HomeScreen
 extends CanvasLayer
 
+const ProfileAvatarControlsScript := preload("res://scripts/ui/profile_avatar_controls.gd")
+const SettingsControlsScript := preload("res://scripts/ui/settings_controls.gd")
+
 signal offline_requested
 signal create_requested(region: StringName)
 signal join_requested(code: String)
@@ -8,16 +11,12 @@ signal gallery_requested
 signal profile_submitted(display_name: String, avatar: AvatarDescriptor)
 
 var status_label: Label
-var name_edit: LineEdit
+var profile_controls
+var avatar_controls
 var code_edit: LineEdit
 var region_select: OptionButton
 var customize_panel: PanelContainer
 var settings_panel: PanelContainer
-var _body_select: OptionButton
-var _skin_select: OptionButton
-var _hair_select: OptionButton
-var _outfit_select: OptionButton
-var _accessory_select: OptionButton
 
 
 func _ready() -> void:
@@ -31,12 +30,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func set_profile(profile: LocalProfile) -> void:
-	name_edit.text = profile.display_name
-	_select_value(_body_select, AvatarDescriptor.BODY_IDS, profile.avatar.body_id)
-	_select_value(_skin_select, AvatarDescriptor.SKIN_IDS, profile.avatar.skin_id)
-	_select_value(_hair_select, AvatarDescriptor.HAIR_IDS, profile.avatar.hair_id)
-	_select_value(_outfit_select, AvatarDescriptor.OUTFIT_IDS, profile.avatar.outfit_id)
-	_select_value(_accessory_select, AvatarDescriptor.ACCESSORY_IDS, profile.avatar.accessory_id)
+	if profile_controls != null:
+		profile_controls.set_profile(profile)
+	if avatar_controls != null:
+		avatar_controls.set_profile(profile)
 
 
 func set_status(message: String, connecting := false) -> void:
@@ -73,10 +70,9 @@ func _build_ui() -> void:
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.add_theme_color_override("font_color", Color("a9bac8"))
 	content.add_child(subtitle)
-	name_edit = LineEdit.new()
-	name_edit.placeholder_text = "Display name"
-	name_edit.max_length = 24
-	content.add_child(name_edit)
+	profile_controls = ProfileAvatarControlsScript.new()
+	profile_controls.configure(true, false)
+	content.add_child(profile_controls)
 	var offline := Button.new()
 	offline.text = "Play Offline"
 	offline.pressed.connect(_on_offline_pressed)
@@ -132,34 +128,19 @@ func _build_ui() -> void:
 func _build_customize_panel(parent: Control) -> PanelContainer:
 	var panel := _overlay_panel(parent, "Avatar")
 	var content := panel.get_child(0) as VBoxContainer
-	_body_select = _option_row(content, "Body", AvatarDescriptor.BODY_IDS)
-	_skin_select = _option_row(content, "Skin", AvatarDescriptor.SKIN_IDS)
-	_hair_select = _option_row(content, "Hair", AvatarDescriptor.HAIR_IDS)
-	_outfit_select = _option_row(content, "Outfit", AvatarDescriptor.OUTFIT_IDS)
-	_accessory_select = _option_row(content, "Accessory", AvatarDescriptor.ACCESSORY_IDS)
-	var save := Button.new()
-	save.text = "Save Profile"
-	save.pressed.connect(_save_profile)
-	content.add_child(save)
+	avatar_controls = ProfileAvatarControlsScript.new()
+	avatar_controls.configure(false, true, "Save Profile")
+	avatar_controls.submitted.connect(_save_profile)
+	content.add_child(avatar_controls)
 	return panel
 
 
 func _build_settings_panel(parent: Control) -> PanelContainer:
 	var panel := _overlay_panel(parent, "Settings")
 	var content := panel.get_child(0) as VBoxContainer
-	_add_slider(content, "Mouse sensitivity", SettingsStore.mouse_sensitivity, 0.0005, 0.01, 0.0005, SettingsStore.set_mouse_sensitivity)
-	_add_slider(content, "Field of view", SettingsStore.field_of_view, 60.0, 110.0, 1.0, SettingsStore.set_field_of_view)
-	_add_slider(content, "Master volume", SettingsStore.master_volume, 0.0, 1.0, 0.05, SettingsStore.set_master_volume)
-	_add_slider(content, "Text scale", SettingsStore.text_scale, 0.8, 1.5, 0.05, SettingsStore.set_text_scale)
-	var reduced_motion := CheckButton.new()
-	reduced_motion.text = "Reduce decorative motion"
-	reduced_motion.button_pressed = SettingsStore.reduced_motion
-	reduced_motion.toggled.connect(SettingsStore.set_reduced_motion)
-	content.add_child(reduced_motion)
-	var voice := Label.new()
-	voice.text = "Voice: coming in a later milestone"
-	voice.add_theme_color_override("font_color", Color("8193a5"))
-	content.add_child(voice)
+	var settings_controls = SettingsControlsScript.new()
+	settings_controls.configure("Voice: coming in a later milestone")
+	content.add_child(settings_controls)
 	return panel
 
 
@@ -187,52 +168,18 @@ func _overlay_panel(parent: Control, title_text: String) -> PanelContainer:
 	return panel
 
 
-func _option_row(parent: VBoxContainer, label_text: String, values: Array) -> OptionButton:
-	var row := HBoxContainer.new()
-	parent.add_child(row)
-	var label := Label.new()
-	label.text = label_text
-	label.custom_minimum_size.x = 110.0
-	row.add_child(label)
-	var option := OptionButton.new()
-	option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	for value in values:
-		option.add_item(_pretty_id(value))
-	row.add_child(option)
-	return option
-
-
-func _add_slider(parent: VBoxContainer, label_text: String, value: float, minimum: float, maximum: float, step: float, setter: Callable) -> void:
-	var label := Label.new()
-	label.text = label_text
-	parent.add_child(label)
-	var slider := HSlider.new()
-	slider.min_value = minimum
-	slider.max_value = maximum
-	slider.step = step
-	slider.value = value
-	slider.value_changed.connect(func(new_value: float) -> void: setter.call(new_value))
-	parent.add_child(slider)
-
-
 func _on_create_pressed() -> void:
 	_submit_profile()
 	create_requested.emit(StringName(region_select.get_item_text(region_select.selected).to_lower()))
 
 
-func _save_profile() -> void:
+func _save_profile(_display_name: String, _avatar: AvatarDescriptor) -> void:
 	_submit_profile()
 	customize_panel.hide()
 
 
 func _submit_profile() -> void:
-	var avatar := AvatarDescriptor.new()
-	avatar.body_id = AvatarDescriptor.BODY_IDS[_body_select.selected]
-	avatar.skin_id = AvatarDescriptor.SKIN_IDS[_skin_select.selected]
-	avatar.hair_id = AvatarDescriptor.HAIR_IDS[_hair_select.selected]
-	avatar.outfit_id = AvatarDescriptor.OUTFIT_IDS[_outfit_select.selected]
-	avatar.accessory_id = AvatarDescriptor.ACCESSORY_IDS[_accessory_select.selected]
-	profile_submitted.emit(name_edit.text, avatar)
+	profile_submitted.emit(profile_controls.get_display_name(), avatar_controls.get_avatar())
 
 
 func _on_offline_pressed() -> void:
@@ -248,17 +195,6 @@ func _on_join_pressed() -> void:
 func _show_panel(panel: Control) -> void:
 	customize_panel.visible = panel == customize_panel
 	settings_panel.visible = panel == settings_panel
-
-
-func _select_value(option: OptionButton, values: Array, selected: StringName) -> void:
-	option.select(maxi(0, values.find(selected)))
-
-
-func _pretty_id(value: StringName) -> String:
-	var parts := str(value).split("_", false)
-	if parts.size() > 1:
-		parts.remove_at(0)
-	return " ".join(parts).capitalize()
 
 
 func _panel_style(color: Color) -> StyleBoxFlat:

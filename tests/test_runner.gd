@@ -1,6 +1,6 @@
 extends Node
 
-const TEST_COUNT := 20
+const TEST_COUNT := 21
 
 var failures: PackedStringArray = []
 
@@ -10,6 +10,7 @@ func _ready() -> void:
 	_test_avatar_fallbacks()
 	_test_chat_sanitization()
 	_test_profile_sanitization()
+	await _test_shared_profile_controls()
 	_test_resources()
 	_test_project_configuration()
 	_test_isolated_storage_configuration()
@@ -68,6 +69,23 @@ func _test_chat_sanitization() -> void:
 func _test_profile_sanitization() -> void:
 	_expect(LocalProfile.sanitize_display_name(" [Admin]\n ") == "Admin", "Display names should be plain and single-line.")
 	_expect(LocalProfile.sanitize_display_name("  ") == LocalProfile.DEFAULT_NAME, "Blank display names should use the guest fallback.")
+
+
+func _test_shared_profile_controls() -> void:
+	var controls := preload("res://scripts/ui/profile_avatar_controls.gd").new()
+	controls.configure(true, true, "Apply")
+	add_child(controls)
+	await get_tree().process_frame
+	controls.set_profile(ProfileStore.current_profile)
+	controls.name_edit.text = "Shared UI"
+	var submitted := {"ok": false}
+	controls.submitted.connect(func(display_name: String, avatar: AvatarDescriptor) -> void:
+		submitted["ok"] = display_name == "Shared UI" and avatar.body_id == ProfileStore.current_profile.avatar.body_id
+	)
+	controls.submit()
+	_expect(bool(submitted["ok"]), "Shared profile controls should emit the edited name and selected avatar.")
+	controls.queue_free()
+	await get_tree().process_frame
 
 
 func _test_resources() -> void:

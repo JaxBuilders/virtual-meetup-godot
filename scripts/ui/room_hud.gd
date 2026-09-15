@@ -1,6 +1,9 @@
 class_name RoomHUD
 extends CanvasLayer
 
+const ProfileAvatarControlsScript := preload("res://scripts/ui/profile_avatar_controls.gd")
+const SettingsControlsScript := preload("res://scripts/ui/settings_controls.gd")
+
 signal chat_submitted(message: String)
 signal emote_selected(emote_id: StringName)
 signal leave_requested
@@ -18,12 +21,7 @@ var emote_panel: PanelContainer
 var people_list: VBoxContainer
 var code_label: Label
 var lock_toggle: CheckButton
-var _profile_name: LineEdit
-var _body_select: OptionButton
-var _skin_select: OptionButton
-var _hair_select: OptionButton
-var _outfit_select: OptionButton
-var _accessory_select: OptionButton
+var profile_controls
 var _participant_rows: Dictionary = {}
 
 
@@ -44,12 +42,8 @@ func set_room_code(value: String) -> void:
 
 
 func set_profile(profile: LocalProfile) -> void:
-	_profile_name.text = profile.display_name
-	_select(_body_select, AvatarDescriptor.BODY_IDS, profile.avatar.body_id)
-	_select(_skin_select, AvatarDescriptor.SKIN_IDS, profile.avatar.skin_id)
-	_select(_hair_select, AvatarDescriptor.HAIR_IDS, profile.avatar.hair_id)
-	_select(_outfit_select, AvatarDescriptor.OUTFIT_IDS, profile.avatar.outfit_id)
-	_select(_accessory_select, AvatarDescriptor.ACCESSORY_IDS, profile.avatar.accessory_id)
+	if profile_controls != null:
+		profile_controls.set_profile(profile)
 
 
 func add_chat(display_name: String, message: String) -> void:
@@ -219,34 +213,15 @@ func _build_room_menu() -> PanelContainer:
 	var avatar := VBoxContainer.new()
 	avatar.name = "Avatar"
 	tabs.add_child(avatar)
-	_profile_name = LineEdit.new()
-	_profile_name.placeholder_text = "Display name"
-	_profile_name.max_length = 24
-	avatar.add_child(_profile_name)
-	_body_select = _option(avatar, "Body", AvatarDescriptor.BODY_IDS)
-	_skin_select = _option(avatar, "Skin", AvatarDescriptor.SKIN_IDS)
-	_hair_select = _option(avatar, "Hair", AvatarDescriptor.HAIR_IDS)
-	_outfit_select = _option(avatar, "Outfit", AvatarDescriptor.OUTFIT_IDS)
-	_accessory_select = _option(avatar, "Accessory", AvatarDescriptor.ACCESSORY_IDS)
-	var apply := Button.new()
-	apply.text = "Apply avatar"
-	apply.pressed.connect(_submit_profile)
-	avatar.add_child(apply)
+	profile_controls = ProfileAvatarControlsScript.new()
+	profile_controls.configure(true, true, "Apply avatar")
+	profile_controls.submitted.connect(func(display_name: String, avatar_descriptor: AvatarDescriptor) -> void: profile_submitted.emit(display_name, avatar_descriptor))
+	avatar.add_child(profile_controls)
 	var settings := VBoxContainer.new()
 	settings.name = "Settings"
 	tabs.add_child(settings)
-	_slider(settings, "Mouse sensitivity", SettingsStore.mouse_sensitivity, 0.0005, 0.01, 0.0005, SettingsStore.set_mouse_sensitivity)
-	_slider(settings, "Field of view", SettingsStore.field_of_view, 60.0, 110.0, 1.0, SettingsStore.set_field_of_view)
-	_slider(settings, "Master volume", SettingsStore.master_volume, 0.0, 1.0, 0.05, SettingsStore.set_master_volume)
-	_slider(settings, "Text scale", SettingsStore.text_scale, 0.8, 1.5, 0.05, SettingsStore.set_text_scale)
-	var reduced_motion := CheckButton.new()
-	reduced_motion.text = "Reduce decorative motion"
-	reduced_motion.button_pressed = SettingsStore.reduced_motion
-	reduced_motion.toggled.connect(SettingsStore.set_reduced_motion)
-	settings.add_child(reduced_motion)
-	var voice := Label.new()
-	voice.text = "Voice: coming later (no microphone is accessed)"
-	settings.add_child(voice)
+	var settings_controls = SettingsControlsScript.new()
+	settings.add_child(settings_controls)
 	var leave := Button.new()
 	leave.text = "Leave Room"
 	leave.pressed.connect(func() -> void: leave_requested.emit())
@@ -267,45 +242,3 @@ func _on_chat_focus_exited() -> void:
 	if chat_entry.visible:
 		chat_entry.hide()
 		modal_visibility_changed.emit(false)
-
-
-func _submit_profile() -> void:
-	var avatar := AvatarDescriptor.new()
-	avatar.body_id = AvatarDescriptor.BODY_IDS[_body_select.selected]
-	avatar.skin_id = AvatarDescriptor.SKIN_IDS[_skin_select.selected]
-	avatar.hair_id = AvatarDescriptor.HAIR_IDS[_hair_select.selected]
-	avatar.outfit_id = AvatarDescriptor.OUTFIT_IDS[_outfit_select.selected]
-	avatar.accessory_id = AvatarDescriptor.ACCESSORY_IDS[_accessory_select.selected]
-	profile_submitted.emit(_profile_name.text, avatar)
-
-
-func _option(parent: VBoxContainer, label_text: String, values: Array) -> OptionButton:
-	var row := HBoxContainer.new()
-	parent.add_child(row)
-	var label := Label.new()
-	label.text = label_text
-	label.custom_minimum_size.x = 110.0
-	row.add_child(label)
-	var option := OptionButton.new()
-	option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	for value in values:
-		option.add_item(str(value).trim_prefix(str(value).get_slice("_", 0) + "_").capitalize())
-	row.add_child(option)
-	return option
-
-
-func _slider(parent: VBoxContainer, label_text: String, value: float, minimum: float, maximum: float, step: float, setter: Callable) -> void:
-	var label := Label.new()
-	label.text = label_text
-	parent.add_child(label)
-	var slider := HSlider.new()
-	slider.min_value = minimum
-	slider.max_value = maximum
-	slider.step = step
-	slider.value = value
-	slider.value_changed.connect(func(new_value: float) -> void: setter.call(new_value))
-	parent.add_child(slider)
-
-
-func _select(option: OptionButton, values: Array, value: StringName) -> void:
-	option.select(maxi(0, values.find(value)))
