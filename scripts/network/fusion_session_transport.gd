@@ -256,7 +256,8 @@ func _on_player_left(player_id: int, _inactive: bool = false) -> void:
 		participant_removed.emit(player_id)
 
 
-func _on_player_joined(_player_id: int, _user_id: String = "") -> void:
+func _on_player_joined(player_id: int, _user_id: String = "") -> void:
+	_departed_player_ids.erase(player_id)
 	_publish_local_profile()
 
 
