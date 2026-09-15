@@ -1,6 +1,6 @@
 extends Node
 
-const TEST_COUNT := 21
+const TEST_COUNT := 23
 
 var failures: PackedStringArray = []
 
@@ -15,6 +15,8 @@ func _ready() -> void:
 	_test_project_configuration()
 	_test_isolated_storage_configuration()
 	_test_network_state_codec()
+	_test_prop_state_rejects_stale_revisions()
+	_test_prop_state_uses_shared_live_packet()
 	_test_participant_rejoin_clears_departed_state()
 	await _test_hud_participant_row_replacement()
 	_test_settings_round_trip()
@@ -114,13 +116,46 @@ func _test_isolated_storage_configuration() -> void:
 func _test_network_state_codec() -> void:
 	var transport := FusionSessionTransport.new()
 	transport.local_player_id = 1
-	var result := {"received": false}
+	var result := {"received": false, "count": 0}
 	transport.prop_state_received.connect(func(prop_id: StringName, value_transform: Transform3D, linear_velocity: Vector3, _angular_velocity: Vector3) -> void:
+		result["count"] = int(result["count"]) + 1
 		result["received"] = prop_id == &"ball_0" and value_transform.origin.is_equal_approx(Vector3(1.0, 2.0, 3.0)) and linear_velocity.is_equal_approx(Vector3(4.0, 5.0, 6.0))
 	)
-	var packed := str(transport.call("_pack_prop_state", 2, Transform3D(Basis.IDENTITY, Vector3(1.0, 2.0, 3.0)), Vector3(4.0, 5.0, 6.0), Vector3.ONE))
+	var packed := str(transport.call("_pack_prop_state", 2, 1, Transform3D(Basis.IDENTITY, Vector3(1.0, 2.0, 3.0)), Vector3(4.0, 5.0, 6.0), Vector3.ONE))
+	transport.call("_observe_prop_property", &"ball_0", packed)
 	transport.call("_observe_prop_property", &"ball_0", packed)
 	_expect(bool(result["received"]), "Late-join prop state should round-trip through the bounded room-property codec.")
+	_expect(int(result["count"]) == 1, "Duplicate late-join prop packets should be ignored.")
+	transport.free()
+
+
+func _test_prop_state_rejects_stale_revisions() -> void:
+	var transport := FusionSessionTransport.new()
+	transport.local_player_id = 1
+	var result := {"count": 0, "x": 0.0}
+	transport.prop_state_received.connect(func(_prop_id: StringName, value_transform: Transform3D, _linear_velocity: Vector3, _angular_velocity: Vector3) -> void:
+		result["count"] = int(result["count"]) + 1
+		result["x"] = value_transform.origin.x
+	)
+	var first := str(transport.call("_pack_prop_state", 2, 1, Transform3D(Basis.IDENTITY, Vector3(1.0, 0.0, 0.0)), Vector3.ZERO, Vector3.ZERO))
+	var newer := str(transport.call("_pack_prop_state", 2, 2, Transform3D(Basis.IDENTITY, Vector3(2.0, 0.0, 0.0)), Vector3.ZERO, Vector3.ZERO))
+	transport.call("_observe_prop_property", &"block_0", newer)
+	transport.call("_observe_prop_property", &"block_0", first)
+	_expect(int(result["count"]) == 1, "Stale prop revisions from the same sender should be ignored.")
+	_expect(is_equal_approx(float(result["x"]), 2.0), "The newest accepted prop revision should remain authoritative.")
+	transport.free()
+
+
+func _test_prop_state_uses_shared_live_packet() -> void:
+	var transport := FusionSessionTransport.new()
+	transport.local_player_id = 1
+	var result := {"received": false}
+	transport.prop_state_received.connect(func(prop_id: StringName, value_transform: Transform3D, _linear_velocity: Vector3, _angular_velocity: Vector3) -> void:
+		result["received"] = prop_id == &"die_0" and value_transform.origin.is_equal_approx(Vector3(0.0, 3.0, 0.0))
+	)
+	var packed := str(transport.call("_pack_prop_state", 3, 4, Transform3D(Basis.IDENTITY, Vector3(0.0, 3.0, 0.0)), Vector3.ZERO, Vector3.ZERO))
+	transport.fusion_receive_prop_state("die_0", packed)
+	_expect(bool(result["received"]), "Live prop RPC should use the same bounded packet codec as late-join state.")
 	transport.free()
 
 

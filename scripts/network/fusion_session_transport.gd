@@ -13,6 +13,7 @@ const ROOM_OPTIONS := {
 }
 const PROFILE_PREFIX := "profile_"
 const PROP_PREFIX := "prop_"
+const PROP_PACKET_VERSION := 1
 const LOCK_KEY := "room_locked"
 const POLL_INTERVAL := 0.35
 const JOIN_TIMEOUT := 12.0
@@ -27,6 +28,8 @@ var _join_timeout: float = 0.0
 var _departed_player_ids: Dictionary = {}
 var _participant_fingerprints: Dictionary = {}
 var _observed_prop_fingerprints: Dictionary = {}
+var _observed_prop_revisions: Dictionary = {}
+var _prop_publish_revisions: Dictionary = {}
 var _spawner: Node
 
 
@@ -161,10 +164,13 @@ func publish_pose(position: Vector3, yaw: float, velocity: Vector3) -> void:
 
 func publish_prop_state(prop_id: StringName, transform: Transform3D, linear_velocity: Vector3, angular_velocity: Vector3) -> void:
 	if state == State.JOINED:
-		_send_rpc(Callable(self, "fusion_receive_prop_state").bind(str(prop_id), transform, linear_velocity, angular_velocity))
+		var revision := int(_prop_publish_revisions.get(prop_id, 0)) + 1
+		_prop_publish_revisions[prop_id] = revision
+		var packed := _pack_prop_state(local_player_id, revision, transform, linear_velocity, angular_velocity)
+		_send_rpc(Callable(self, "fusion_receive_prop_state").bind(str(prop_id), packed))
 		var room := _fusion.call("get_room") as Object
 		if room != null:
-			room.call("set_property", PROP_PREFIX + str(prop_id), _pack_prop_state(local_player_id, transform, linear_velocity, angular_velocity))
+			room.call("set_property", PROP_PREFIX + str(prop_id), packed)
 
 
 func fusion_receive_chat(player_id: int, display_name: String, message: String) -> void:
@@ -187,8 +193,8 @@ func fusion_receive_pose(player_id: int, position: Vector3, yaw: float, velocity
 		pose_received.emit(player_id, position, yaw, velocity)
 
 
-func fusion_receive_prop_state(prop_id: String, transform: Transform3D, linear_velocity: Vector3, angular_velocity: Vector3) -> void:
-	prop_state_received.emit(StringName(prop_id), transform, linear_velocity, angular_velocity)
+func fusion_receive_prop_state(prop_id: String, packed: String) -> void:
+	_observe_prop_property(StringName(prop_id), packed)
 
 
 func _begin_online_action() -> bool:
@@ -244,6 +250,8 @@ func _on_room_left() -> void:
 	_departed_player_ids.clear()
 	_participant_fingerprints.clear()
 	_observed_prop_fingerprints.clear()
+	_observed_prop_revisions.clear()
+	_prop_publish_revisions.clear()
 	state = State.IDLE
 	room_left.emit()
 	status_changed.emit("Left online room.", false)
@@ -361,34 +369,88 @@ func _send_rpc(callable: Callable) -> void:
 		_fusion.call("rpc", callable)
 
 
-func _pack_prop_state(sender_id: int, value_transform: Transform3D, linear_velocity: Vector3, angular_velocity: Vector3) -> String:
+func _pack_prop_state(sender_id: int, revision: int, value_transform: Transform3D, linear_velocity: Vector3, angular_velocity: Vector3) -> String:
 	var rotation := value_transform.basis.get_rotation_quaternion()
-	return JSON.stringify([
-		sender_id,
-		value_transform.origin.x, value_transform.origin.y, value_transform.origin.z,
-		rotation.x, rotation.y, rotation.z, rotation.w,
-		linear_velocity.x, linear_velocity.y, linear_velocity.z,
-		angular_velocity.x, angular_velocity.y, angular_velocity.z,
-	])
+	return JSON.stringify({
+		"version": PROP_PACKET_VERSION,
+		"sender_id": sender_id,
+		"revision": revision,
+		"origin": [value_transform.origin.x, value_transform.origin.y, value_transform.origin.z],
+		"rotation": [rotation.x, rotation.y, rotation.z, rotation.w],
+		"linear_velocity": [linear_velocity.x, linear_velocity.y, linear_velocity.z],
+		"angular_velocity": [angular_velocity.x, angular_velocity.y, angular_velocity.z],
+	})
 
 
 func _observe_prop_property(prop_id: StringName, packed: String) -> void:
 	if str(_observed_prop_fingerprints.get(prop_id, "")) == packed:
 		return
+	var decoded := _decode_prop_state(packed)
+	if decoded.is_empty():
+		return
+	var sender_id := int(decoded["sender_id"])
+	if sender_id == local_player_id:
+		return
+	var revision := int(decoded["revision"])
+	var revision_key := "%s:%d" % [str(prop_id), sender_id]
+	if revision <= int(_observed_prop_revisions.get(revision_key, -1)):
+		return
+	_observed_prop_revisions[revision_key] = revision
 	_observed_prop_fingerprints[prop_id] = packed
-	var decoded: Variant = JSON.parse_string(packed)
-	if not decoded is Array:
-		return
-	var values := decoded as Array
-	if values.size() != 14 or int(values[0]) == local_player_id:
-		return
-	var value_transform := Transform3D(
-		Basis(Quaternion(float(values[4]), float(values[5]), float(values[6]), float(values[7]))),
-		Vector3(float(values[1]), float(values[2]), float(values[3]))
-	)
-	var linear_velocity := Vector3(float(values[8]), float(values[9]), float(values[10]))
-	var angular_velocity := Vector3(float(values[11]), float(values[12]), float(values[13]))
+	var value_transform := decoded["transform"] as Transform3D
+	var linear_velocity := decoded["linear_velocity"] as Vector3
+	var angular_velocity := decoded["angular_velocity"] as Vector3
 	prop_state_received.emit(prop_id, value_transform, linear_velocity, angular_velocity)
+
+
+func _decode_prop_state(packed: String) -> Dictionary:
+	var decoded: Variant = JSON.parse_string(packed)
+	if decoded is Dictionary:
+		var data := decoded as Dictionary
+		if int(data.get("version", 0)) != PROP_PACKET_VERSION:
+			return {}
+		return _decode_prop_state_values(
+			int(data.get("sender_id", 0)),
+			int(data.get("revision", 0)),
+			data.get("origin", []),
+			data.get("rotation", []),
+			data.get("linear_velocity", []),
+			data.get("angular_velocity", [])
+		)
+	if decoded is Array:
+		var values := decoded as Array
+		if values.size() != 14:
+			return {}
+		return _decode_prop_state_values(
+			int(values[0]),
+			0,
+			[values[1], values[2], values[3]],
+			[values[4], values[5], values[6], values[7]],
+			[values[8], values[9], values[10]],
+			[values[11], values[12], values[13]]
+		)
+	return {}
+
+
+func _decode_prop_state_values(sender_id: int, revision: int, origin_value: Variant, rotation_value: Variant, linear_value: Variant, angular_value: Variant) -> Dictionary:
+	if sender_id <= 0 or revision < 0 or not origin_value is Array or not rotation_value is Array or not linear_value is Array or not angular_value is Array:
+		return {}
+	var origin := origin_value as Array
+	var rotation := rotation_value as Array
+	var linear := linear_value as Array
+	var angular := angular_value as Array
+	if origin.size() != 3 or rotation.size() != 4 or linear.size() != 3 or angular.size() != 3:
+		return {}
+	return {
+		"sender_id": sender_id,
+		"revision": revision,
+		"transform": Transform3D(
+			Basis(Quaternion(float(rotation[0]), float(rotation[1]), float(rotation[2]), float(rotation[3]))),
+			Vector3(float(origin[0]), float(origin[1]), float(origin[2]))
+		),
+		"linear_velocity": Vector3(float(linear[0]), float(linear[1]), float(linear[2])),
+		"angular_velocity": Vector3(float(angular[0]), float(angular[1]), float(angular[2])),
+	}
 
 
 func _connect_if_present(signal_name: StringName, callable: Callable) -> void:
