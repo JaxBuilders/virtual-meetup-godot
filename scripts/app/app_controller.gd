@@ -170,6 +170,7 @@ func _on_network_player_spawned(network_player: MeetupPlayerController, is_local
 		_configure_local_player(network_player)
 		return
 	network_player.name = "RemoteNetworkPlayer%d" % owner_id
+	_remove_standalone_remote_avatar(owner_id)
 	remote_avatars[owner_id] = network_player.avatar_visual
 	var snapshot := active_session.participants.get(owner_id) as ParticipantSnapshot
 	if snapshot != null:
@@ -277,6 +278,9 @@ func _on_participant_upsert(snapshot: ParticipantSnapshot) -> void:
 	if snapshot.is_local or room_root == null:
 		return
 	var avatar := remote_avatars.get(snapshot.player_id) as AvatarVisual
+	if avatar != null and not is_instance_valid(avatar):
+		remote_avatars.erase(snapshot.player_id)
+		avatar = null
 	if avatar != null and avatar.get_parent() is MeetupPlayerController:
 		avatar.apply_descriptor(snapshot.avatar)
 		return
@@ -292,10 +296,14 @@ func _on_participant_upsert(snapshot: ParticipantSnapshot) -> void:
 func _on_participant_removed(player_id: int) -> void:
 	if hud != null:
 		hud.remove_participant(player_id)
-	var avatar := remote_avatars.get(player_id) as AvatarVisual
-	if avatar != null and not avatar.get_parent() is MeetupPlayerController:
-		avatar.queue_free()
+	_remove_standalone_remote_avatar(player_id)
 	remote_avatars.erase(player_id)
+
+
+func _remove_standalone_remote_avatar(player_id: int) -> void:
+	var avatar := remote_avatars.get(player_id) as AvatarVisual
+	if avatar != null and is_instance_valid(avatar) and not avatar.get_parent() is MeetupPlayerController:
+		avatar.queue_free()
 
 
 func _on_room_lock_changed(locked: bool) -> void:

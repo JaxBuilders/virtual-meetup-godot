@@ -1,6 +1,6 @@
 extends Node
 
-const TEST_COUNT := 16
+const TEST_COUNT := 20
 
 var failures: PackedStringArray = []
 
@@ -14,6 +14,8 @@ func _ready() -> void:
 	_test_project_configuration()
 	_test_isolated_storage_configuration()
 	_test_network_state_codec()
+	_test_participant_rejoin_clears_departed_state()
+	await _test_hud_participant_row_replacement()
 	_test_settings_round_trip()
 	_test_profile_round_trip()
 	await get_tree().process_frame
@@ -24,6 +26,8 @@ func _ready() -> void:
 	await _test_offline_emote_loop()
 	await _test_offline_interaction_loop()
 	await _test_offline_leave_loop()
+	await _test_remote_avatar_placeholder_replacement()
+	await _test_remote_avatar_cleanup()
 	if failures.is_empty():
 		print("VIRTUAL_MEETUP_TESTS passed=%d failed=0" % TEST_COUNT)
 		get_tree().quit(0)
@@ -100,6 +104,32 @@ func _test_network_state_codec() -> void:
 	transport.call("_observe_prop_property", &"ball_0", packed)
 	_expect(bool(result["received"]), "Late-join prop state should round-trip through the bounded room-property codec.")
 	transport.free()
+
+
+func _test_participant_rejoin_clears_departed_state() -> void:
+	var transport := FusionSessionTransport.new()
+	transport.call("_on_player_left", 42)
+	_expect(transport._departed_player_ids.has(42), "Departed participant IDs should be tracked after leave.")
+	transport.call("_on_player_joined", 42, "")
+	_expect(not transport._departed_player_ids.has(42), "A rejoining participant should clear stale departed state.")
+	transport.free()
+
+
+func _test_hud_participant_row_replacement() -> void:
+	var hud := RoomHUD.new()
+	add_child(hud)
+	await get_tree().process_frame
+	var first := _make_participant(2, "Guest One")
+	var second := _make_participant(2, "Guest Two")
+	hud.upsert_participant(first)
+	hud.upsert_participant(second)
+	_expect(hud._participant_rows.size() == 1, "HUD should keep one row per participant after replacement.")
+	_expect(hud.people_list.get_child_count() == 1, "HUD should remove replaced participant rows immediately.")
+	hud.remove_participant(2)
+	_expect(hud._participant_rows.is_empty(), "HUD should forget removed participant rows immediately.")
+	_expect(hud.people_list.get_child_count() == 0, "HUD should remove participant row nodes immediately.")
+	hud.queue_free()
+	await get_tree().process_frame
 
 
 func _test_settings_round_trip() -> void:
@@ -205,6 +235,38 @@ func _test_offline_leave_loop() -> void:
 	await _destroy_app(app)
 
 
+func _test_remote_avatar_placeholder_replacement() -> void:
+	var app := await _spawn_offline_app()
+	var snapshot := _make_participant(22, "Remote Friend")
+	app.call("_on_participant_upsert", snapshot)
+	await get_tree().process_frame
+	var placeholder := app.remote_avatars.get(22) as AvatarVisual
+	_expect(placeholder != null and placeholder.get_parent() == app.room_root, "Remote participant upsert should create a standalone placeholder avatar before spawn.")
+	var network_player := MeetupPlayerController.new()
+	app.room_root.add_child(network_player)
+	await get_tree().process_frame
+	app.state = AppController.AppState.ONLINE_ROOM
+	app.call("_on_network_player_spawned", network_player, false, 22)
+	await get_tree().process_frame
+	_expect(app.remote_avatars.get(22) == network_player.avatar_visual, "Network spawn should replace the placeholder with the network avatar.")
+	_expect(not is_instance_valid(placeholder) or placeholder.get_parent() == null, "Network spawn should remove the old standalone placeholder avatar.")
+	await _destroy_app(app)
+
+
+func _test_remote_avatar_cleanup() -> void:
+	var app := await _spawn_offline_app()
+	var snapshot := _make_participant(23, "Leaving Friend")
+	app.call("_on_participant_upsert", snapshot)
+	await get_tree().process_frame
+	var placeholder := app.remote_avatars.get(23) as AvatarVisual
+	app.call("_on_participant_removed", 23)
+	await get_tree().process_frame
+	_expect(not app.remote_avatars.has(23), "Participant removal should forget the remote avatar entry.")
+	_expect(not app.hud._participant_rows.has(23), "Participant removal should clear the HUD row.")
+	_expect(not is_instance_valid(placeholder) or placeholder.get_parent() == null, "Participant removal should remove standalone remote avatars.")
+	await _destroy_app(app)
+
+
 func _spawn_offline_app() -> AppController:
 	var app := AppController.new()
 	add_child(app)
@@ -219,6 +281,17 @@ func _destroy_app(app: AppController) -> void:
 	if app != null and is_instance_valid(app):
 		app.queue_free()
 	await get_tree().process_frame
+
+
+func _make_participant(player_id: int, display_name: String, is_local := false) -> ParticipantSnapshot:
+	var snapshot := ParticipantSnapshot.new()
+	snapshot.player_id = player_id
+	snapshot.profile_id = "profile-%d" % player_id
+	snapshot.display_name = display_name
+	snapshot.avatar = AvatarDescriptor.new()
+	snapshot.is_local = is_local
+	snapshot.is_master = player_id == 1
+	return snapshot
 
 
 func _expect(condition: bool, message: String) -> void:

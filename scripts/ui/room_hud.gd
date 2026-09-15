@@ -112,6 +112,8 @@ func upsert_participant(snapshot: ParticipantSnapshot) -> void:
 func remove_participant(player_id: int) -> void:
 	var existing := _participant_rows.get(player_id) as Control
 	if existing != null:
+		if existing.get_parent() != null:
+			existing.get_parent().remove_child(existing)
 		existing.queue_free()
 		_participant_rows.erase(player_id)
 
