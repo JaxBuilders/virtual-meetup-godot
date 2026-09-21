@@ -27,7 +27,7 @@ Gate: the complete social playground works without Fusion.
 
 - Home flow for offline play, online room actions, customization, and settings.
 - Cozy clubhouse and patio with third-/first-person movement.
-- Authored MPFB avatar proof as the gameplay default, with the primitive avatar retained as a load-failure fallback; emotes, seating, balls, blocks, and dice.
+- Sourced MPFB humanoid visuals only, including previews and remote players; procedural modification/generation from sourced humanoid assets is allowed, but primitive assembled humans and accessories are not. Emotes, seating, balls, blocks, and dice.
 - Ephemeral local chat, room menu, local safety controls, and development gallery.
 
 ## Milestone 3 — Private online room

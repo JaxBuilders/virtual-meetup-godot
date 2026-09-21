@@ -53,6 +53,11 @@ func _test_avatar_fallbacks() -> void:
 	var descriptor := AvatarDescriptor.from_dictionary({"body": "unknown", "skin": "skin_deep"})
 	_expect(descriptor.body_id == AvatarDescriptor.BODY_IDS[0], "Unknown body should use the default.")
 	_expect(descriptor.skin_id == &"skin_deep", "Allowed skin should survive decoding.")
+	for hair in ["hair_cap", "hair_bun"]:
+		var legacy := AvatarDescriptor.from_dictionary({"hair": hair, "accessory": "glasses"})
+		_expect(legacy.hair_id == &"hair_crop" and legacy.accessory_id == &"none", "Retired primitive options should map to supported authored selections.")
+	var badge := AvatarDescriptor.from_dictionary({"accessory": "badge"})
+	_expect(badge.accessory_id == &"none", "Retired badges should map to no accessory.")
 
 
 func _test_chat_sanitization() -> void:
@@ -243,13 +248,13 @@ func _test_profile_round_trip() -> void:
 	var test_avatar := AvatarDescriptor.new()
 	test_avatar.body_id = &"body_tall"
 	test_avatar.skin_id = &"skin_deep"
-	test_avatar.hair_id = &"hair_bun"
+	test_avatar.hair_id = &"hair_bald"
 	test_avatar.outfit_id = &"outfit_violet"
-	test_avatar.accessory_id = &"badge"
+	test_avatar.accessory_id = &"none"
 	ProfileStore.update_profile("Round Trip", test_avatar)
 	ProfileStore.load_profile()
 	_expect(ProfileStore.current_profile.display_name == "Round Trip", "Profile name should survive a round trip.")
-	_expect(ProfileStore.current_profile.avatar.hair_id == &"hair_bun", "Avatar IDs should survive a round trip.")
+	_expect(ProfileStore.current_profile.avatar.hair_id == &"hair_bald", "Avatar IDs should survive a round trip.")
 	ProfileStore.update_profile(original_name, original_avatar)
 
 
@@ -431,6 +436,8 @@ func _test_live_customization() -> void:
 		selector.item_selected.emit(selected_index)
 		_expect(submissions.size() == 1 and submissions[0].outfit_id == &"outfit_cream", "An outfit selection should immediately submit exactly one profile update.")
 		var preview: AvatarPreview = controls.avatar_preview
+		for mesh: MeshInstance3D in preview.avatar.find_children("*", "MeshInstance3D", true, false):
+			_expect(not mesh.mesh is PrimitiveMesh, "Humanoid visuals must use sourced meshes, not generated primitives.")
 		_expect(preview.avatar.uses_authored_visual() and preview.avatar.descriptor.outfit_id == &"outfit_cream", "Customization should immediately preview the authored outfit.")
 		var body := preview.avatar.get_node("AuthoredBody")
 		var changed := preview.avatar.descriptor.duplicate_descriptor()

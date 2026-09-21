@@ -4,7 +4,7 @@ Every approved imported asset must record its stable ID, in-project paths, origi
 
 ## Authored foundation content
 
-The clubhouse, primitive fallback avatars, UI, materials, and activity props are project-authored Godot resources and scripts. Imported avatar content is recorded below. Runtime customization adds project-authored primitive cap, bun, glasses, and badge accessories and per-instance suit/skin tints to the approved MakeHuman wardrobe. These additions do not alter the source GLB or its checksum.
+The clubhouse, UI, materials, and activity props are project-authored Godot resources and scripts. Imported avatar content is recorded below. Runtime customization applies per-instance suit/skin tints, body scaling, and sourced hair visibility to the approved MakeHuman wardrobe without altering source GLBs or their checksums. Primitive humanoid fallbacks and cap/bun/glasses/badge approximations have been removed.
 
 ### `brand.virtual-meetup-mark`
 
@@ -58,7 +58,7 @@ The clubhouse, primitive fallback avatars, UI, materials, and activity props are
 - Generation: Blender 5.2.1 LTS with MPFB2 2.0.15; core human with its `game_engine` rig; selected assets fitted and weighted through MPFB; Blender source saved before glTF export. Blender 4.5 remains the pinned release baseline and must reproduce the proof before release.
 - Transformation: rig normalized to 1.70 meters; modifiers evaluated for export; embedded textures imported as Basis Universal; skinning limited by glTF export to four highest normalized joint influences.
 - Output metrics: five skinned meshes, 39,342 evaluated triangles, 53 bones, and approximately 1.714 meters of visible vertical extent.
-- Compatibility: this remains one authored proof rather than a complete selectable catalog. Godot's humanoid importer normalizes it to `GeneralSkeleton`, overwrites axes, and corrects the MPFB A-pose silhouette to Godot's humanoid T-pose. It became the private-development gameplay default on 2026-09-13 while the primitive visual remains a load-failure fallback.
+- Compatibility: this remains one authored proof rather than a complete selectable catalog. Godot's humanoid importer normalizes it to `GeneralSkeleton`, overwrites axes, and corrects the MPFB A-pose silhouette to Godot's humanoid T-pose. It became the private-development gameplay default on 2026-09-13; there is no longer a primitive load-failure fallback.
 
 ## Audited code/vendor snapshots
 

@@ -70,6 +70,11 @@ Codex may add research entries here. During a project-owner-authorized explorati
 
 ## MakeHuman wardrobe candidates
 
+The [first ten-item wardrobe fitting queue](WARDROBE_BATCH_01.md) records the
+2026-09-21 audit of already-downloaded CC0 hair, tops, bottoms, and shoes.
+Its machine-readable manifest records exact selected-file hashes. These are
+available locally for fitting, not yet selectable runtime assets.
+
 - ID: `makehuman-system-assets`
 - Title: MakeHuman system assets
 - Preview URL: https://static.makehumancommunity.org/assets/assetpacks/makehuman_system_assets.html

@@ -1,0 +1,404 @@
+{
+  "schema": 1,
+  "status": "local evaluation only; not fitted or imported",
+  "packs": [
+    {
+      "id": "hair01",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/hair01.html",
+      "archive": ".tools/avatar-lab/downloads/hair01_cc0.zip",
+      "sha256": "49445d69848a313ec41a9970f6a0fe4bcf925c9f1c6ef40a76f119c2e07940c9"
+    },
+    {
+      "id": "shirts01",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "archive": ".tools/avatar-lab/downloads/shirts01_cc0.zip",
+      "sha256": "a5a723b0e84a109bb190fcfeac7f1de4138d875da3e30fe5b3340eac9f38bcd3"
+    },
+    {
+      "id": "pants01",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants01.html",
+      "archive": ".tools/avatar-lab/downloads/pants01_cc0.zip",
+      "sha256": "e4e0ec60db34f279be291a83cfd7b342a7c5cf09bb7676682a5f39f4f6ac4ad9"
+    },
+    {
+      "id": "shoes01",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shoes01.html",
+      "archive": ".tools/avatar-lab/downloads/shoes01_cc0.zip",
+      "sha256": "ded3f70428505eabbf1f6d7b5f61196a7366ef20757103d276ad0ed336c35ada"
+    }
+  ],
+  "assets": [
+    {
+      "id": "cortu_short_messy_hair",
+      "pack": "hair01",
+      "creator": "Cortu",
+      "source": "http://www.makehumancommunity.org/node/2809",
+      "license": "CC0",
+      "description": "Messy blond hair.",
+      "source_triangles": 1092,
+      "dependencies_present": true,
+      "files": [
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/cortu_short_messy_hair/cortu_short_messy_hair.mhclo",
+          "sha256": "868ae0221ba97b23c3c5d1d1c5757e6fd01ddad4a2992affffb6fd7880e3cda7"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/cortu_short_messy_hair/cortu_short_messy_hair.thumb",
+          "sha256": "b83505f7464a504cd25838b56c5f4c309e5702db9158aac695cb598d359ac9dc"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/cortu_short_messy_hair/short_messy.mhmat",
+          "sha256": "28e4ba6df3f1af7a3b68ffde131509be4add84f397409d26b8fc6f8d6efd475d"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/cortu_short_messy_hair/short_messy.obj",
+          "sha256": "d6dd3d11d44424e8dcd63d98b15763f1c3bb754be8eb02a527ec5f04724a54b1"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/cortu_short_messy_hair/short_messy_diff.png",
+          "sha256": "ddf92030eeefe80fdc12703ef44624ba4dd690f458042def549f2853b0daa0dc"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/cortu_short_messy_hair/short_messy_objnorm.png",
+          "sha256": "22f397b8ffd19f4a8036034650defc6c964ab9a664c96f8a2db124a956d8a212"
+        }
+      ]
+    },
+    {
+      "id": "toigo_blunt_bob",
+      "pack": "hair01",
+      "creator": "MargaretToigo",
+      "source": "http://www.makehumancommunity.org/node/1669",
+      "license": "CC0",
+      "description": "This is a blunt bob hairstyle that will go on most humans. Some slight adjustments may be needed for toddler senior and plus-size humans. I have included diffuse specular and normal maps and the .mhmat file should get them all imported into Blender where their properties can be adjusted according to preference and render engine. Illustration shows hair with Subsurf of two. Three additional colors are available in Materials.",
+      "source_triangles": 2858,
+      "dependencies_present": true,
+      "files": [
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/toigo_blunt_bob/BakedHairNORMAL.png",
+          "sha256": "f0b761f31129ef5f808394a4f71b04e902fbd5eadfcad0f3ae0c8d89f87a73cb"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/toigo_blunt_bob/BakedHair_spec.png",
+          "sha256": "57889d479bc327d3854c7f12689c6c53ce3ef8c445bb7da4dda0ffde9cf5f9b8"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/toigo_blunt_bob/StrawberryBlondHair.png",
+          "sha256": "2612df792dc3f1aa919e6a07ab7107ba79ce108cefb81d02913ae577d2862f57"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/toigo_blunt_bob/bob_blunt.mhmat",
+          "sha256": "2cb32864aaa374bb45dfb0224a023b0a5993dfaafbac051aea170c2cbe6dfea1"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/toigo_blunt_bob/bob_blunt.obj",
+          "sha256": "e77b50e03ed0957fa596cc6d388cade25629c8650f734b16b581a1b51bbf11ff"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/toigo_blunt_bob/toigo_blunt_bob.mhclo",
+          "sha256": "252f6b2edbc9f1568b85ff7f367709f5c328110023573df35720a4c84879f4e1"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/toigo_blunt_bob/toigo_blunt_bob.thumb",
+          "sha256": "3cb51989c89e9eb91d389c397122a15c82cd56e3d11513cf925f3abb5f5e7e8a"
+        }
+      ]
+    },
+    {
+      "id": "elvs_reverse_french_braid_bun",
+      "pack": "hair01",
+      "creator": "Elvaerwyn",
+      "source": "http://www.makehumancommunity.org/node/1337",
+      "license": "CC0",
+      "description": "A reworking of Makehuman Braid 01 that works with original texturing. As such have included a dark grapewash recolor of braid texture. This was made using base hair from makehuman software Braid 01 edited in the Blender and The Gimp. Reverse French braid bun change.",
+      "source_triangles": 7622,
+      "dependencies_present": true,
+      "files": [
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/elvs_reverse_french_braid_bun/braid01_diffuse_grapewash.png",
+          "sha256": "cb2f5476fb6e68dc2dfbf18ef6efb8aabf4fe981d0bde76700e690262e1fe946"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/elvs_reverse_french_braid_bun/elvs_reverse_french_braid_bun.mhclo",
+          "sha256": "01046e726dafbae2d9e73a07546e755985afe1c8d771a80da8ba57172f96120c"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/elvs_reverse_french_braid_bun/elvs_reverse_french_braid_bun.thumb",
+          "sha256": "6cdfd8b0ad262322d60a108a3c7808810a9bcf3d1246cd5acddfdbc58f6ef24d"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/elvs_reverse_french_braid_bun/rev_fr_braidbun1.mhmat",
+          "sha256": "3391786ef5f2e33dd2e2a24e7fae26b31dde1343d1c3b7285ca36885446efff5"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/hair01_cc0/hair/elvs_reverse_french_braid_bun/rev_fr_braidbun1.obj",
+          "sha256": "d5ef1b59f48da38c33d93f40a8f78b830017e40062d3f8ac7b6791aa5240bb02"
+        }
+      ]
+    },
+    {
+      "id": "toigo_basic_tucked_t-shirt",
+      "pack": "shirts01",
+      "creator": "MargaretToigo",
+      "source": "http://www.makehumancommunity.org/node/1203",
+      "license": "CC0",
+      "description": "This is a basic T-shirt with the bottom hemline scaled so that the shirt looks tucked into pants. It was made for adult male humans but will fit other average humans. A subsurf of at least two is recommended. I designed it to be worn with my Wool Pants -- seen in example pic -- http://www.makehumancommunity.org/clothes/wool_pants.html but with a little adjustment it can also be paired with other bottoms. The bump texture is needed for realism. Several other colors are in Materials. Illustration was rendered with subsurf set to two. Model Jerome is also wearing Mindfront's Shoes Monk Strap male http://www.makehumancommunity.org/clothes/shoes_monk_strap_male.html",
+      "source_triangles": 2700,
+      "dependencies_present": true,
+      "files": [
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/toigo_basic_tucked_t-shirt/T-shirt_basic-bump.png",
+          "sha256": "dfe923b14a9188857d12eb227ceb6365dcf1ec3cd97e42f30c6fe3ae2c474578"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/toigo_basic_tucked_t-shirt/T-shirt_basic.png",
+          "sha256": "c1992ad975e14aa2cef891ff9632d28283607b2de6160d72e350f059043a063b"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/toigo_basic_tucked_t-shirt/t_shirt_basic_tucked.mhmat",
+          "sha256": "44098003a7ed47cd4c613d04adcdccaae47fe0d2b380bf3c25f105a739814f94"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/toigo_basic_tucked_t-shirt/t_shirt_basic_tucked.obj",
+          "sha256": "22159cf14d1f6831f931b49625f8f7692910bac22499c43466c0b5a2159b4d03"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/toigo_basic_tucked_t-shirt/toigo_basic_tucked_t-shirt.mhclo",
+          "sha256": "c34bd03895c5ad9ec46965ef7d5f3e5e8c567630797ab312f8762c1d9fde8f71"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/toigo_basic_tucked_t-shirt/toigo_basic_tucked_t-shirt.thumb",
+          "sha256": "2826621aa9c17847e95506e8615db52ad45675914e5e3798f65cbf92c5b3811d"
+        }
+      ]
+    },
+    {
+      "id": "toigo_fisherman_sweater",
+      "pack": "shirts01",
+      "creator": "MargaretToigo",
+      "source": "http://www.makehumancommunity.org/node/1187",
+      "license": "CC0",
+      "description": "This is a fisherman knit sweater designed for adult males but will fit other average humans. The texture comes with a normal map which is essential to make the sweater look more sweater-like. Five other colors are available in Materials. Illustration model Hal is also wearing Mindfront's M Trousers 01 which can be found here: http://www.makehumancommunity.org/clothes/m_trousers_01.html",
+      "source_triangles": 4164,
+      "dependencies_present": true,
+      "files": [
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/toigo_fisherman_sweater/shirt-knit-NORM.png",
+          "sha256": "c3458d9b5174d7c34beed74618828c26f479200512d691a6bada34e7ea5d9a62"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/toigo_fisherman_sweater/shirt-knit.png",
+          "sha256": "a7d526797da4cdc1a79603a35abebf41e577277267f36db6641cdb6cebe6ffb1"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/toigo_fisherman_sweater/sweater_fisherman.mhmat",
+          "sha256": "254c011b3edae8cbab7adb2d082de670dd41b26324bf5772318b7557a127fd64"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/toigo_fisherman_sweater/sweater_fisherman.obj",
+          "sha256": "2844465f4e798666a90f631ea4a89ae30d3e526ef045a978d338908750d21d09"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/toigo_fisherman_sweater/toigo_fisherman_sweater.mhclo",
+          "sha256": "b454960bdd61985f246e88e547a127a75d590dc87d6c1a4062fb7c7c281d8999"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/toigo_fisherman_sweater/toigo_fisherman_sweater.thumb",
+          "sha256": "a64cdf427b565eb72d69c4e3b93cd6021df66fe4a7e30c14c55fbced8c3df391"
+        }
+      ]
+    },
+    {
+      "id": "namuhekam_male_polo_shirt",
+      "pack": "shirts01",
+      "creator": "namuhekam",
+      "source": "http://www.makehumancommunity.org/node/2909",
+      "license": "CC0",
+      "description": "Basic polo shirt for men. Use a subdivision modifier to improve the appearance of the geometry. Also fits females with additional tweaking to the mesh. Greater deformations in extremes on muscle slider. It has not been tested in older versions of MakeHuman.",
+      "source_triangles": 4106,
+      "dependencies_present": true,
+      "files": [
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/namuhekam_male_polo_shirt/Polo_Base_Color.png",
+          "sha256": "d8e74dbcc3e79227dd7f6d8b1e0ed6c614eb11d4dc3cfeb935222783c23ae64b"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/namuhekam_male_polo_shirt/Polo_Height.png",
+          "sha256": "f69d99fab6b30ad1972ac27e260f6e59129f7e3dcb988ed4c75d64cca29c386e"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/namuhekam_male_polo_shirt/Polo_Normal_OpenGL.png",
+          "sha256": "1428ecac615cf45d409f42167b3d4cba70ea77a14a0c4f06ff5d01b75e7a8b5c"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/namuhekam_male_polo_shirt/Polo_Roughness.png",
+          "sha256": "b7205361068df100f8f63256a265d052dfa4bbec96d826e7999b23fcf17c95c2"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/namuhekam_male_polo_shirt/Polo_t-shirt.mhmat",
+          "sha256": "fb47735dab1f3aacf39b9aea7e9c8343ea47c39f8a13fab559ba505b7c28356c"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/namuhekam_male_polo_shirt/Polo_t-shirt.obj",
+          "sha256": "aaee5f49077a8bacb8b1077910e4b9cc7946d587c75e367273f4ecaf94abd627"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/namuhekam_male_polo_shirt/namuhekam_male_polo_shirt.mhclo",
+          "sha256": "1639239b0d6d16ef2ca98f1f5af1af447d1e9e6950cd0fad9ecf774fa597434b"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shirts01_cc0/clothes/namuhekam_male_polo_shirt/namuhekam_male_polo_shirt.thumb",
+          "sha256": "c5343f1f6282963d05d4f16ed2799b8441d75f676ad3045b5f329c21bf0fa8ed"
+        }
+      ]
+    },
+    {
+      "id": "cortu_cargo_pants",
+      "pack": "pants01",
+      "creator": "Cortu",
+      "source": "http://www.makehumancommunity.org/node/2798",
+      "license": "CC0",
+      "description": "Simple low slung green cargo pants.",
+      "source_triangles": 392,
+      "dependencies_present": true,
+      "files": [
+        {
+          "path": ".tools/avatar-lab/extracted/pants01_cc0/clothes/cortu_cargo_pants/cargo_pants.mhmat",
+          "sha256": "f0718c17a792c56d947525d0fb49ad3b7f9bb33b27acb8353dd94827096f497e"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/pants01_cc0/clothes/cortu_cargo_pants/cargo_pants.obj",
+          "sha256": "705467843e1136ca9bc91736efe9601a9cd7243abdeaa9752d69ea53f0974089"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/pants01_cc0/clothes/cortu_cargo_pants/cargo_pants_diff.png",
+          "sha256": "b091229d558aed8ad41f31235265e98164a2f709158f4113d0ce0e072f680197"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/pants01_cc0/clothes/cortu_cargo_pants/cargo_pants_norm.png",
+          "sha256": "0851011ad2fd36f6ad2bd1bdd6202bad32fb555b7d6cdb6b474811ba5a5fe7a6"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/pants01_cc0/clothes/cortu_cargo_pants/cortu_cargo_pants.mhclo",
+          "sha256": "5bc0c7282a5a2694d55b6df2ed5642a382d89d0b77bd98703dac7e110e51fada"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/pants01_cc0/clothes/cortu_cargo_pants/cortu_cargo_pants.thumb",
+          "sha256": "8974f0ee1b057c4bb11b44d98816aa0f3b9260c845ee27e79c40caee7ecaddde"
+        }
+      ]
+    },
+    {
+      "id": "toigo_wool_pants",
+      "pack": "pants01",
+      "creator": "MargaretToigo",
+      "source": "http://www.makehumancommunity.org/node/1194",
+      "license": "CC0",
+      "description": "This is a pair of wool pants designed for male humans but will fit other average humans too. Several other colors are in Materials. Illustration also pictures Shoes Monk Strap male by Mindfront. http://www.makehumancommunity.org/clothes/shoes_monk_strap_male.html",
+      "source_triangles": 2674,
+      "dependencies_present": true,
+      "files": [
+        {
+          "path": ".tools/avatar-lab/extracted/pants01_cc0/clothes/toigo_wool_pants/Pants_wool.png",
+          "sha256": "a820b0dc4f9f881956a068f26889ca677b696dbdccfdbf2a168e7b327b390ab6"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/pants01_cc0/clothes/toigo_wool_pants/pants_wool.mhmat",
+          "sha256": "fedf31e98ea92b57c8f45e10ec167d420f5eb11b9410feb075c321c3798fdb53"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/pants01_cc0/clothes/toigo_wool_pants/pants_wool.obj",
+          "sha256": "e02cd1e417ca3365e4dafc033f415c5186739df535d98810075cface0ce59c96"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/pants01_cc0/clothes/toigo_wool_pants/toigo_wool_pants.mhclo",
+          "sha256": "ac1a57a817976d80ece8a88698873d54de7f252d01ba3dca5e361693621fcf22"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/pants01_cc0/clothes/toigo_wool_pants/toigo_wool_pants.thumb",
+          "sha256": "23dfe8875ee2fbdaef1e705871d2054868198fc415188ec177bebf96a09b944c"
+        }
+      ]
+    },
+    {
+      "id": "toigo_ankle_boots_male",
+      "pack": "shoes01",
+      "creator": "MargaretToigo",
+      "source": "http://www.makehumancommunity.org/node/1743",
+      "license": "CC0",
+      "description": "This is a pair of ankle boots that will fit most male humans. I have included diffuse specular and normal maps and the .mhmat file should get them all imported into Blender where their properties can be adjusted according to preference and render engine. These boots have the same UV mapping as my Ankle Boots http://www.makehumancommunity.org/clothes/ankle_boots.html . Illustration shows boots with subsurf of two and a mean crease of one around the heel and sole edge loops.",
+      "source_triangles": 4120,
+      "dependencies_present": true,
+      "files": [
+        {
+          "path": ".tools/avatar-lab/extracted/shoes01_cc0/clothes/toigo_ankle_boots_male/BootsAnkle-norm.png",
+          "sha256": "d4bbc26383a8c191be31a645c5ddfdea4c3ba27d56140305271c4553dbaae8a3"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shoes01_cc0/clothes/toigo_ankle_boots_male/BootsAnkle-spec.png",
+          "sha256": "30e2ce35ab197a55f43f2cdae248940445b5fe14de30eebe4f3c2aed96a80802"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shoes01_cc0/clothes/toigo_ankle_boots_male/BootsAnkleM.png",
+          "sha256": "0e476df27c5ddebca2c55ce889abd46387ba405f34833de81db466d1a4b1ca5b"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shoes01_cc0/clothes/toigo_ankle_boots_male/boots_ankle_male.mhmat",
+          "sha256": "0731fd75bc7333f83010e64d9d5ff7441a0067bc79e3baf489f9ec7abcb47aba"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shoes01_cc0/clothes/toigo_ankle_boots_male/boots_ankle_male.obj",
+          "sha256": "b23f306d072e5ec89b5958242111e647a76db374a8ff219b006010ff2e504294"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shoes01_cc0/clothes/toigo_ankle_boots_male/toigo_ankle_boots_male.mhclo",
+          "sha256": "0143dbcfdac444a42af339bcc65352af8ad6d8d2519457aa1aff89a639dd554a"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shoes01_cc0/clothes/toigo_ankle_boots_male/toigo_ankle_boots_male.thumb",
+          "sha256": "96306005c0346eeb670fc2f66cf2b831f520a53668290f3abdc380ffadee610f"
+        }
+      ]
+    },
+    {
+      "id": "toigo_ballet_flats",
+      "pack": "shoes01",
+      "creator": "MargaretToigo",
+      "source": "http://www.makehumancommunity.org/node/1734",
+      "license": "CC0",
+      "description": "This is a pair of women's ballet-style flats. They will fit most female humans around ages 15-50 without much adjustment. I have included diffuse specular and normal maps and the .mhmat file should get them all imported into Blender where their properties can be adjusted according to preference and render engine. Illustration shows shoes with subsurf of two and a mean crease of one around the heel edge loops.",
+      "source_triangles": 8960,
+      "dependencies_present": true,
+      "files": [
+        {
+          "path": ".tools/avatar-lab/extracted/shoes01_cc0/clothes/toigo_ballet_flats/BalletFlats.png",
+          "sha256": "f72c35c56b670e0936b548090e1f362220e6abbb2cec210674c1c86a5864ef12"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shoes01_cc0/clothes/toigo_ballet_flats/BalletFlatsPlainNorm.png",
+          "sha256": "2162a61c88fdd2b85e7bfea8c1e260cdd679838a66c0c6ed79b77188a02f7b94"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shoes01_cc0/clothes/toigo_ballet_flats/BalletFlatsSPEC.png",
+          "sha256": "94b7f68f2b13623e6dc8708d0fa037c2f8527eb439d44b245ed003ef737e6bfa"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shoes01_cc0/clothes/toigo_ballet_flats/flats_ballet.mhmat",
+          "sha256": "5964fab9d98a254515c356cb0ec619fcc58470df8d9340734dedcd5f0a59b783"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shoes01_cc0/clothes/toigo_ballet_flats/flats_ballet.obj",
+          "sha256": "80fd320014dacaa1a58740ae5ee8a37ab32bac05c6f68ddebf1ad1b4a1c86b8c"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shoes01_cc0/clothes/toigo_ballet_flats/toigo_ballet_flats.mhclo",
+          "sha256": "9c7336e6b07c7fb004e8c7bb0bd6bc6c49208d7e9fdf09ae5702d1f279d96e4a"
+        },
+        {
+          "path": ".tools/avatar-lab/extracted/shoes01_cc0/clothes/toigo_ballet_flats/toigo_ballet_flats.thumb",
+          "sha256": "7f3cbd195f5acae9efdae162eae26238a2f7314d17853627c11ebe3b0acbea31"
+        }
+      ]
+    }
+  ]
+}

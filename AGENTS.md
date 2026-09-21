@@ -10,6 +10,7 @@ Local-only instructions belong in `AGENTS_LOCAL.md`. Read it after this file whe
 
 - Target Godot 4.7.1 with typed GDScript.
 - Keep direct input in `PlayerInputSource`; simulation consumes `PlayerCommand`.
+- Humanoid visuals must use sourced assets, including fallback selections, previews, and remote players. Procedural modification/generation of those humans is allowed; primitive assembled humanoids or stand-in hair/accessories are not. Invisible physics colliders are unaffected.
 - Keep vendor services behind project-owned adapters and preserve complete offline behavior.
 - Build activities as runtime scenes/resources; runtime code must not depend on editor APIs or write beneath `res://`.
 - Treat `docs/ASSET_CANDIDATES.md` approval as a hard gate before downloading or importing content.
