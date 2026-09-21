@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "target_profile": {
+    "id": "virtual_meetup_game_engine_v1",
+    "armature_object": "Armature",
+    "root_motion_bone": "Root",
+    "bones": {
+      "root": "Root",
+      "hips": "pelvis",
+      "spine_lower": "spine_01",
+      "spine_middle": "spine_02",
+      "chest": "spine_03",
+      "neck": "neck_01",
+      "head": "head",
+      "shoulder_l": "clavicle_l",
+      "upper_arm_l": "upperarm_l",
+      "lower_arm_l": "lowerarm_l",
+      "hand_l": "hand_l",
+      "shoulder_r": "clavicle_r",
+      "upper_arm_r": "upperarm_r",
+      "lower_arm_r": "lowerarm_r",
+      "hand_r": "hand_r",
+      "upper_leg_l": "thigh_l",
+      "lower_leg_l": "calf_l",
+      "foot_l": "foot_l",
+      "toe_l": "ball_l",
+      "upper_leg_r": "thigh_r",
+      "lower_leg_r": "calf_r",
+      "foot_r": "foot_r",
+      "toe_r": "ball_r"
+    }
+  },
+  "source_profiles": {
+    "mixamo": {
+      "status": "mapping_ready_source_assets_not_approved",
+      "root_motion_role": "hips",
+      "bones": {
+        "hips": "mixamorig:Hips",
+        "spine_lower": "mixamorig:Spine",
+        "spine_middle": "mixamorig:Spine1",
+        "chest": "mixamorig:Spine2",
+        "neck": "mixamorig:Neck",
+        "head": "mixamorig:Head",
+        "shoulder_l": "mixamorig:LeftShoulder",
+        "upper_arm_l": "mixamorig:LeftArm",
+        "lower_arm_l": "mixamorig:LeftForeArm",
+        "hand_l": "mixamorig:LeftHand",
+        "shoulder_r": "mixamorig:RightShoulder",
+        "upper_arm_r": "mixamorig:RightArm",
+        "lower_arm_r": "mixamorig:RightForeArm",
+        "hand_r": "mixamorig:RightHand",
+        "upper_leg_l": "mixamorig:LeftUpLeg",
+        "lower_leg_l": "mixamorig:LeftLeg",
+        "foot_l": "mixamorig:LeftFoot",
+        "toe_l": "mixamorig:LeftToeBase",
+        "upper_leg_r": "mixamorig:RightUpLeg",
+        "lower_leg_r": "mixamorig:RightLeg",
+        "foot_r": "mixamorig:RightFoot",
+        "toe_r": "mixamorig:RightToeBase"
+      }
+    },
+    "quaternius_universal": {
+      "status": "mapping_ready_rest_normalization_required",
+      "root_motion_role": "root",
+      "bones": {
+        "root": "root",
+        "hips": "pelvis",
+        "spine_lower": "spine_01",
+        "spine_middle": "spine_02",
+        "chest": "spine_03",
+        "neck": "neck_01",
+        "head": "Head",
+        "shoulder_l": "clavicle_l",
+        "upper_arm_l": "upperarm_l",
+        "lower_arm_l": "lowerarm_l",
+        "hand_l": "hand_l",
+        "shoulder_r": "clavicle_r",
+        "upper_arm_r": "upperarm_r",
+        "lower_arm_r": "lowerarm_r",
+        "hand_r": "hand_r",
+        "upper_leg_l": "thigh_l",
+        "lower_leg_l": "calf_l",
+        "foot_l": "foot_l",
+        "toe_l": "ball_l",
+        "upper_leg_r": "thigh_r",
+        "lower_leg_r": "calf_r",
+        "foot_r": "foot_r",
+        "toe_r": "ball_r"
+      }
+    }
+  }
+}

@@ -14,6 +14,7 @@ var _hair_select: OptionButton
 var _outfit_select: OptionButton
 var _accessory_select: OptionButton
 var _current_avatar := AvatarDescriptor.new()
+var avatar_preview: AvatarPreview
 
 
 func configure(include_name: bool, include_avatar: bool, submit_text := "") -> void:
@@ -40,6 +41,8 @@ func set_avatar(avatar: AvatarDescriptor) -> void:
 	_select(_hair_select, AvatarDescriptor.HAIR_IDS, _current_avatar.hair_id)
 	_select(_outfit_select, AvatarDescriptor.OUTFIT_IDS, _current_avatar.outfit_id)
 	_select(_accessory_select, AvatarDescriptor.ACCESSORY_IDS, _current_avatar.accessory_id)
+	if avatar_preview != null:
+		avatar_preview.apply_descriptor(_current_avatar)
 
 
 func get_display_name(fallback := "") -> String:
@@ -59,22 +62,40 @@ func get_avatar() -> AvatarDescriptor:
 
 
 func submit(display_name_fallback := "") -> void:
-	submitted.emit(get_display_name(display_name_fallback), get_avatar())
+	var avatar := get_avatar()
+	if avatar_preview != null:
+		avatar_preview.apply_descriptor(avatar)
+	submitted.emit(get_display_name(display_name_fallback), avatar)
 
 
 func _build_controls() -> void:
 	add_theme_constant_override("separation", 10)
+	var fields := self as VBoxContainer
+	if show_avatar_fields:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 16)
+		add_child(row)
+		avatar_preview = AvatarPreview.new()
+		row.add_child(avatar_preview)
+		fields = VBoxContainer.new()
+		fields.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		fields.add_theme_constant_override("separation", 10)
+		row.add_child(fields)
 	if show_name_field:
 		name_edit = LineEdit.new()
 		name_edit.placeholder_text = "Display name"
 		name_edit.max_length = 24
-		add_child(name_edit)
+		fields.add_child(name_edit)
+		name_edit.text_submitted.connect(func(_value: String) -> void: submit())
+		name_edit.focus_exited.connect(func() -> void: submit())
 	if show_avatar_fields:
-		_body_select = _option_row("Body", AvatarDescriptor.BODY_IDS)
-		_skin_select = _option_row("Skin", AvatarDescriptor.SKIN_IDS)
-		_hair_select = _option_row("Hair", AvatarDescriptor.HAIR_IDS)
-		_outfit_select = _option_row("Outfit", AvatarDescriptor.OUTFIT_IDS)
-		_accessory_select = _option_row("Accessory", AvatarDescriptor.ACCESSORY_IDS)
+		_body_select = _option_row(fields, "Body", AvatarDescriptor.BODY_IDS)
+		_skin_select = _option_row(fields, "Skin tint", AvatarDescriptor.SKIN_IDS)
+		_hair_select = _option_row(fields, "Hair", AvatarDescriptor.HAIR_IDS)
+		_outfit_select = _option_row(fields, "Suit color", AvatarDescriptor.OUTFIT_IDS)
+		_accessory_select = _option_row(fields, "Accessory", AvatarDescriptor.ACCESSORY_IDS)
+		for selector: OptionButton in [_body_select, _skin_select, _hair_select, _outfit_select, _accessory_select]:
+			selector.item_selected.connect(func(_index: int) -> void: submit())
 	if not submit_button_text.is_empty():
 		var submit_button := Button.new()
 		submit_button.text = submit_button_text
@@ -82,9 +103,9 @@ func _build_controls() -> void:
 		add_child(submit_button)
 
 
-func _option_row(label_text: String, values: Array) -> OptionButton:
+func _option_row(parent: VBoxContainer, label_text: String, values: Array) -> OptionButton:
 	var row := HBoxContainer.new()
-	add_child(row)
+	parent.add_child(row)
 	var label := Label.new()
 	label.text = label_text
 	label.custom_minimum_size.x = 110.0

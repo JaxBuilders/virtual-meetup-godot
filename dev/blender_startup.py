@@ -32,9 +32,20 @@ bpy.context.preferences.extensions.repos.new(
 mpfb = addon_utils.enable("bl_ext.virtual_meetup.mpfb", default_set=True, persistent=False)
 if mpfb is None:
     raise RuntimeError("MPFB registration failed")
+wardrobe_root = root / ".tools" / "avatar-lab" / "library"
+if not wardrobe_root.is_dir():
+    wardrobe_root = root / ".tools" / "avatar-lab" / "extracted" / "makehuman_system_assets"
+if wardrobe_root.is_dir():
+    preferences = bpy.context.preferences.addons["bl_ext.virtual_meetup.mpfb"].preferences
+    preferences.mpfb_second_root = str(wardrobe_root)
+    from bl_ext.virtual_meetup.mpfb.services import LocationService
+    LocationService.update_second_root()
+    print("Virtual Meetup: project-local MakeHuman wardrobe enabled")
 if "--verify-authoring" in sys.argv:
     # Verify registration without opening a bridge or modifying a scene.
     print("VIRTUAL_MEETUP_AUTHORING_CHECK MPFB registered; MCP consent patch verified")
+elif bpy.app.background:
+    print("Virtual Meetup: MPFB enabled for background authoring; Blender MCP skipped")
 else:
     module.register()
     for name in ("polyhaven", "hyper3d", "hunyuan3d", "sketchfab", "polypizza"):

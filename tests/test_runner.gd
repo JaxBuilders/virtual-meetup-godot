@@ -93,6 +93,41 @@ func _test_shared_profile_controls() -> void:
 func _test_resources() -> void:
 	_expect(load("res://resources/activities/lounge_basics.tres") is ActivityDefinition, "Activity definition should load.")
 	_expect(load("res://resources/avatars/default_avatar.tres") is AvatarDescriptor, "Default avatar should load.")
+	var makehuman_scene := load("res://assets/avatars/makehuman_baseline.glb") as PackedScene
+	_expect(makehuman_scene != null, "The approved MakeHuman baseline should import as a scene.")
+	if makehuman_scene != null:
+		var instance := makehuman_scene.instantiate()
+		var skeleton := instance.find_child("GeneralSkeleton", true, false) as Skeleton3D
+		var body := instance.find_child("BodyMesh", true, false) as MeshInstance3D
+		_expect(skeleton != null and skeleton.get_bone_count() == 53, "The MakeHuman baseline should retain its humanoid skeleton.")
+		_expect(skeleton != null and skeleton.find_bone("RightUpperArm") >= 0, "The MakeHuman skeleton should use normalized humanoid bone names.")
+		_expect(body != null and body.get_aabb().size.y > 1.6 and body.get_aabb().size.y < 1.8, "The MakeHuman baseline should remain human-scale.")
+		var profile_text := FileAccess.get_file_as_string("res://dev/blender/retarget_profiles/humanoid_profiles.json")
+		var profiles := JSON.parse_string(profile_text) as Dictionary
+		var target_profile := profiles.get("target_profile", {}) as Dictionary
+		var target_bones := target_profile.get("bones", {}) as Dictionary
+		_expect(not target_bones.is_empty(), "The avatar retarget profile should define canonical target bones.")
+		var target_map := load("res://resources/avatars/makehuman_game_engine_bone_map.tres") as BoneMap
+		_expect(target_map != null and target_map.profile is SkeletonProfileHumanoid, "The baseline should retain its humanoid import map.")
+		_expect(target_map != null and target_map.get_skeleton_bone_name(&"RightUpperArm") == &"upperarm_r", "The baseline import map should preserve its raw MPFB source-bone contract.")
+		instance.free()
+	var wardrobe_scene := load("res://assets/avatars/makehuman_wardrobe_proof.glb") as PackedScene
+	_expect(wardrobe_scene != null, "The approved MakeHuman wardrobe proof should import as a scene.")
+	if wardrobe_scene != null:
+		var wardrobe := wardrobe_scene.instantiate()
+		var wardrobe_skeleton := wardrobe.find_child("GeneralSkeleton", true, false) as Skeleton3D
+		var wardrobe_meshes := wardrobe.find_children("*", "MeshInstance3D", true, false)
+		_expect(wardrobe_skeleton != null and wardrobe_skeleton.get_bone_count() == 53, "The wardrobe proof should use the normalized humanoid skeleton.")
+		_expect(wardrobe_meshes.size() == 5, "The wardrobe proof should contain body, eyes, hair, outfit, and shoes meshes.")
+		wardrobe.free()
+	var animation_scene := load("res://assets/animations/quaternius_ual_standard/UAL1_Standard.glb") as PackedScene
+	_expect(animation_scene != null, "The approved Quaternius animation library should import as a scene.")
+	if animation_scene != null:
+		var animation_source := animation_scene.instantiate()
+		var players := animation_source.find_children("*", "AnimationPlayer", true, false)
+		var animation_player := players[0] as AnimationPlayer if not players.is_empty() else null
+		_expect(animation_player != null and animation_player.get_animation_list().size() == 43, "The Quaternius source should expose all 43 Standard actions.")
+		animation_source.free()
 
 
 func _test_project_configuration() -> void:
@@ -219,6 +254,7 @@ func _test_profile_round_trip() -> void:
 
 
 func _test_runtime_nodes() -> void:
+	_test_live_customization()
 	var player_scene := load("res://scenes/player/player.tscn") as PackedScene
 	var clubhouse_scene := load("res://scenes/venues/clubhouse.tscn") as PackedScene
 	var player := player_scene.instantiate() as MeetupPlayerController
@@ -226,6 +262,39 @@ func _test_runtime_nodes() -> void:
 	add_child(clubhouse)
 	add_child(player)
 	_expect(player.avatar_visual != null and player.camera != null, "Player runtime components should initialize.")
+	_expect(player.avatar_visual != null and player.avatar_visual.uses_authored_visual(), "Players should use the authored MPFB avatar by default.")
+	if player.avatar_visual != null:
+		var authored_body := player.avatar_visual.get_node_or_null("AuthoredBody") as Node3D
+		_expect(authored_body != null and is_equal_approx(absf(authored_body.rotation.y), PI), "The authored avatar should face the controller's negative-Z forward direction.")
+		player.avatar_visual.animate_motion(4.3, true, 1.0 / 60.0)
+		_expect(player.avatar_visual.current_animation() == &"Walk", "The authored avatar should select its normalized walk animation.")
+	player.adjust_third_person_zoom(-1.0)
+	_expect(is_equal_approx(player.spring_arm.spring_length, 3.55), "Third-person wheel-up should move the camera closer.")
+	var wheel_event := InputEventMouseButton.new()
+	wheel_event.button_index = MOUSE_BUTTON_WHEEL_DOWN
+	wheel_event.pressed = true
+	wheel_event.factor = 1.0
+	player.input_source._unhandled_input(wheel_event)
+	var wheel_command := player.input_source.sample_command()
+	_expect(is_equal_approx(wheel_command.camera_zoom, 1.0), "The input source should preserve third-person mouse-wheel steps in PlayerCommand.")
+	player.set_first_person(true)
+	player.adjust_third_person_zoom(1.0)
+	_expect(is_equal_approx(player.spring_arm.spring_length, 0.05), "First-person view should ignore wheel zoom.")
+	player.set_first_person(false)
+	_expect(is_equal_approx(player.spring_arm.spring_length, 3.55), "Returning to third person should restore its zoom distance.")
+	player.rotation.y = 0.0
+	player.camera_yaw = 0.0
+	player.camera_pivot.rotation.y = 0.0
+	player._process_look(Vector2(100.0, 0.0))
+	_expect(is_equal_approx(player.rotation.y, 0.0), "Third-person free-look should not rotate an idle character.")
+	var orbit_world_yaw := player.rotation.y + player.camera_pivot.rotation.y
+	_expect(not is_zero_approx(orbit_world_yaw), "Third-person free-look should orbit the camera around an idle character.")
+	player._orient_character_to_movement(Vector3.RIGHT, 1.0)
+	_expect(is_equal_approx(player.rotation.y, -PI * 0.5), "A moving character should orient toward its world-space travel direction.")
+	_expect(is_equal_approx(player.rotation.y + player.camera_pivot.rotation.y, orbit_world_yaw), "Character turning should preserve the third-person camera's world yaw.")
+	player.camera_yaw = -PI * 0.5
+	var camera_forward := player._camera_relative_movement(Vector2(0.0, -1.0))
+	_expect(camera_forward.is_equal_approx(Vector3.RIGHT), "Forward movement should follow the third-person camera's facing direction.")
 	_expect(clubhouse.props_by_id.size() == 12, "Clubhouse should register balls, blocks, and dice.")
 	player.queue_free()
 	clubhouse.queue_free()
@@ -239,6 +308,7 @@ func _test_offline_room_bootstrap() -> void:
 	_expect(app.player != null and app.player.name == "LocalPlayer", "Offline room should create a local player.")
 	_expect(app.hud != null and app.hud.code_label.text == "Room: OFFLINE", "Offline room should create a HUD with the offline room code.")
 	_expect(app.hud != null and app.hud._participant_rows.has(1), "Offline HUD should show the local participant row.")
+	await _test_menu_animation_updates(app)
 	await _destroy_app(app)
 
 
@@ -345,6 +415,71 @@ func _make_participant(player_id: int, display_name: String, is_local := false) 
 	snapshot.is_local = is_local
 	snapshot.is_master = player_id == 1
 	return snapshot
+
+
+func _test_live_customization() -> void:
+	for screen: CanvasLayer in [HomeScreen.new(), RoomHUD.new()]:
+		add_child(screen)
+		var submissions: Array[AvatarDescriptor] = []
+		screen.profile_submitted.connect(func(_display_name: String, value: AvatarDescriptor) -> void: submissions.append(value))
+		screen.set_profile(LocalProfile.new())
+		_expect(submissions.is_empty(), "Loading a profile should not save it again.")
+		var controls = screen.avatar_controls if screen is HomeScreen else screen.profile_controls
+		var selector: OptionButton = controls._outfit_select
+		var selected_index := AvatarDescriptor.OUTFIT_IDS.find(&"outfit_cream")
+		selector.select(selected_index)
+		selector.item_selected.emit(selected_index)
+		_expect(submissions.size() == 1 and submissions[0].outfit_id == &"outfit_cream", "An outfit selection should immediately submit exactly one profile update.")
+		var preview: AvatarPreview = controls.avatar_preview
+		_expect(preview.avatar.uses_authored_visual() and preview.avatar.descriptor.outfit_id == &"outfit_cream", "Customization should immediately preview the authored outfit.")
+		var body := preview.avatar.get_node("AuthoredBody")
+		var changed := preview.avatar.descriptor.duplicate_descriptor()
+		changed.hair_id = &"hair_bald"
+		preview.apply_descriptor(changed)
+		_expect(preview.avatar.get_node("AuthoredBody") == body, "Changing appearance should preserve the animated avatar instance.")
+		var suit_found := false
+		for child: Node in body.find_children("*", "MeshInstance3D", true, false):
+			var mesh := child as MeshInstance3D
+			if str(mesh.name).contains("short01"):
+				_expect(not mesh.visible, "Bald selection should hide the authored hair mesh.")
+			if str(mesh.name).contains("casualsuit"):
+				suit_found = true
+				var material := mesh.get_surface_override_material(0) as StandardMaterial3D
+				_expect(material != null and material.albedo_color == AvatarVisual.OUTFIT_COLORS[&"outfit_cream"], "Outfit color should reach the authored suit material.")
+				_expect(material != mesh.mesh.surface_get_material(0), "Customization must not mutate shared source materials.")
+		_expect(suit_found, "The customization preview should include the authored suit.")
+		screen.free()
+
+
+func _test_menu_animation_updates(app: AppController) -> void:
+	var player := app.player
+	# Let the actual clubhouse collision settle the player at its spawn.
+	for frame in 90:
+		await get_tree().physics_frame
+		await get_tree().process_frame
+	player.velocity.x = MeetupPlayerController.WALK_SPEED
+	player.avatar_visual.animate_motion(MeetupPlayerController.WALK_SPEED, true, 0.016)
+	app.call("_toggle_room_menu")
+	_expect(player.input_suppressed, "Opening the room menu should suppress player commands.")
+	for frame in 45:
+		await get_tree().physics_frame
+		await get_tree().process_frame
+	_expect(player.avatar_visual.current_animation() == &"Idle", "Walking should transition to idle after stopping with the menu open.")
+	app.call("_toggle_room_menu")
+	player.velocity.y = MeetupPlayerController.JUMP_VELOCITY
+	await get_tree().physics_frame
+	await get_tree().process_frame
+	app.call("_toggle_room_menu")
+	for frame in 10:
+		await get_tree().physics_frame
+		await get_tree().process_frame
+	_expect(not player.is_on_floor(), "The player should remain airborne briefly after opening a menu mid-jump.")
+	_expect(player.avatar_visual.current_animation() == &"Jump", "The airborne animation should still update with the menu open.")
+	for frame in 90:
+		await get_tree().physics_frame
+		await get_tree().process_frame
+	_expect(player.is_on_floor(), "The player should land while the menu remains open.")
+	_expect(player.avatar_visual.current_animation() == &"Idle", "Landing should transition to idle while the menu remains open.")
 
 
 func _expect(condition: bool, message: String) -> void:

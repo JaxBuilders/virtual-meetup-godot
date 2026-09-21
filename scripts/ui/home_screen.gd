@@ -73,6 +73,7 @@ func _build_ui() -> void:
 	profile_controls = ProfileAvatarControlsScript.new()
 	profile_controls.configure(true, false)
 	content.add_child(profile_controls)
+	profile_controls.submitted.connect(func(_name: String, _avatar: AvatarDescriptor) -> void: _submit_profile())
 	var offline := Button.new()
 	offline.text = "Play Offline"
 	offline.pressed.connect(_on_offline_pressed)
@@ -127,10 +128,12 @@ func _build_ui() -> void:
 
 func _build_customize_panel(parent: Control) -> PanelContainer:
 	var panel := _overlay_panel(parent, "Avatar")
+	panel.position.x = 280.0
+	panel.size.x = 720.0
 	var content := panel.get_child(0) as VBoxContainer
 	avatar_controls = ProfileAvatarControlsScript.new()
-	avatar_controls.configure(false, true, "Save Profile")
-	avatar_controls.submitted.connect(_save_profile)
+	avatar_controls.configure(false, true)
+	avatar_controls.submitted.connect(func(_name: String, _avatar: AvatarDescriptor) -> void: _submit_profile())
 	content.add_child(avatar_controls)
 	return panel
 
@@ -171,11 +174,6 @@ func _overlay_panel(parent: Control, title_text: String) -> PanelContainer:
 func _on_create_pressed() -> void:
 	_submit_profile()
 	create_requested.emit(StringName(region_select.get_item_text(region_select.selected).to_lower()))
-
-
-func _save_profile(_display_name: String, _avatar: AvatarDescriptor) -> void:
-	_submit_profile()
-	customize_panel.hide()
 
 
 func _submit_profile() -> void:

@@ -3,6 +3,7 @@ extends RefCounted
 
 var movement: Vector2 = Vector2.ZERO
 var look: Vector2 = Vector2.ZERO
+var camera_zoom: float = 0.0
 var jump_pressed: bool = false
 var sprint_held: bool = false
 var interact_pressed: bool = false

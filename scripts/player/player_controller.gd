@@ -16,6 +16,10 @@ const AIR_ACCELERATION := 6.0
 const JUMP_VELOCITY := 7.0
 const GRAVITY := 22.0
 const INTERACTION_DISTANCE := 3.2
+const THIRD_PERSON_ZOOM_STEP := 0.65
+const THIRD_PERSON_MIN_DISTANCE := 1.2
+const THIRD_PERSON_MAX_DISTANCE := 8.0
+const CHARACTER_TURN_SPEED := 12.0
 
 var input_source: PlayerInputSource
 var avatar_visual: AvatarVisual
@@ -29,12 +33,15 @@ var is_first_person: bool = false
 var input_suppressed: bool = false
 var seated_at: Node3D
 var local_controlled: bool = true
+var third_person_distance: float = 4.2
+var camera_yaw: float = 0.0
 var _pose_cooldown: float = 0.0
 var _current_prompt: String = ""
 
 
 func _ready() -> void:
 	_build_nodes()
+	camera_yaw = rotation.y
 	floor_snap_length = 0.35
 	floor_max_angle = deg_to_rad(52.0)
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -50,15 +57,13 @@ func _physics_process(delta: float) -> void:
 	var command := input_source.sample_command()
 	_process_global_shortcuts(command)
 	if input_suppressed:
-		velocity.x = move_toward(velocity.x, 0.0, GROUND_ACCELERATION * delta)
-		velocity.z = move_toward(velocity.z, 0.0, GROUND_ACCELERATION * delta)
-		if not is_on_floor():
-			velocity.y -= GRAVITY * delta
-		move_and_slide()
-		return
+		# Menus suppress commands, not simulation or animation state updates.
+		# Replace the sampled command after shortcuts, which may open a menu.
+		command = PlayerCommand.new()
 	_process_look(command.look)
 	if command.view_pressed:
 		set_first_person(not is_first_person)
+	adjust_third_person_zoom(command.camera_zoom)
 	if seated_at != null:
 		velocity = Vector3.ZERO
 		global_position = seated_at.global_position
@@ -93,9 +98,24 @@ func set_input_suppressed(value: bool) -> void:
 
 
 func set_first_person(value: bool) -> void:
+	if value and not is_first_person:
+		rotation.y = camera_yaw
+		camera_pivot.rotation.y = 0.0
 	is_first_person = value
-	spring_arm.spring_length = 0.05 if value else 4.2
+	spring_arm.spring_length = 0.05 if value else third_person_distance
 	avatar_visual.visible = not value
+	_update_third_person_camera_offset()
+
+
+func adjust_third_person_zoom(wheel_steps: float) -> void:
+	if is_first_person or is_zero_approx(wheel_steps):
+		return
+	third_person_distance = clampf(
+		third_person_distance + wheel_steps * THIRD_PERSON_ZOOM_STEP,
+		THIRD_PERSON_MIN_DISTANCE,
+		THIRD_PERSON_MAX_DISTANCE
+	)
+	spring_arm.spring_length = third_person_distance
 
 
 func sit_on(anchor: Node3D) -> bool:
@@ -104,6 +124,10 @@ func sit_on(anchor: Node3D) -> bool:
 	seated_at = anchor
 	global_position = anchor.global_position
 	rotation.y = anchor.global_rotation.y
+	if is_first_person:
+		camera_yaw = rotation.y
+	else:
+		_update_third_person_camera_offset()
 	avatar_visual.play_emote(&"sit", true)
 	return true
 
@@ -162,7 +186,7 @@ func _build_nodes() -> void:
 	add_child(camera_pivot)
 	spring_arm = SpringArm3D.new()
 	spring_arm.name = "SpringArm"
-	spring_arm.spring_length = 4.2
+	spring_arm.spring_length = third_person_distance
 	spring_arm.margin = 0.15
 	camera_pivot.add_child(spring_arm)
 	camera = Camera3D.new()
@@ -198,13 +222,19 @@ func _process_global_shortcuts(command: PlayerCommand) -> void:
 
 
 func _process_look(look: Vector2) -> void:
-	rotation.y -= look.x * SettingsStore.mouse_sensitivity
+	camera_yaw = wrapf(camera_yaw - look.x * SettingsStore.mouse_sensitivity, -PI, PI)
+	if is_first_person:
+		rotation.y = camera_yaw
+		camera_pivot.rotation.y = 0.0
+	else:
+		_update_third_person_camera_offset()
 	camera_pivot.rotation.x = clampf(camera_pivot.rotation.x - look.y * SettingsStore.mouse_sensitivity, deg_to_rad(-75.0), deg_to_rad(70.0))
 
 
 func _simulate_movement(command: PlayerCommand, delta: float) -> void:
-	var local_direction := Vector3(command.movement.x, 0.0, command.movement.y)
-	var world_direction := (global_basis * local_direction).normalized()
+	var world_direction := _camera_relative_movement(command.movement)
+	if not is_first_person and not world_direction.is_zero_approx():
+		_orient_character_to_movement(world_direction, delta)
 	var speed := SPRINT_SPEED if command.sprint_held else WALK_SPEED
 	var desired := world_direction * speed
 	var acceleration := GROUND_ACCELERATION if is_on_floor() else AIR_ACCELERATION
@@ -219,6 +249,26 @@ func _simulate_movement(command: PlayerCommand, delta: float) -> void:
 	if global_position.y < -8.0:
 		global_position = Vector3(0.0, 2.0, 5.0)
 		velocity = Vector3.ZERO
+
+
+func _camera_relative_movement(input_direction: Vector2) -> Vector3:
+	var local_direction := Vector3(input_direction.x, 0.0, input_direction.y)
+	return (Basis(Vector3.UP, camera_yaw) * local_direction).normalized()
+
+
+func _orient_character_to_movement(world_direction: Vector3, delta: float) -> void:
+	var target_yaw := atan2(-world_direction.x, -world_direction.z)
+	rotation.y = lerp_angle(rotation.y, target_yaw, minf(1.0, CHARACTER_TURN_SPEED * delta))
+	if is_first_person:
+		camera_yaw = rotation.y
+	else:
+		_update_third_person_camera_offset()
+
+
+func _update_third_person_camera_offset() -> void:
+	if camera_pivot == null or is_first_person:
+		return
+	camera_pivot.rotation.y = wrapf(camera_yaw - rotation.y, -PI, PI)
 
 
 func _process_interaction(command: PlayerCommand) -> void:

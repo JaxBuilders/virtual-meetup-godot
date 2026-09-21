@@ -2,6 +2,16 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Virtual Meetup: Build Avatar Proofs",
+      "type": "node-terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "command": "env -u NODE_OPTIONS -u VSCODE_INSPECTOR_OPTIONS node dev/dev.mjs blender --build-avatar-proofs",
+      "windows": {
+        "command": "cmd /d /s /c \"set NODE_OPTIONS=& set VSCODE_INSPECTOR_OPTIONS=& node dev/dev.mjs blender --build-avatar-proofs\""
+      }
+    },
+    {
       "name": "Virtual Meetup: Blender + MCP + MPFB",
       "type": "node-terminal",
       "request": "launch",

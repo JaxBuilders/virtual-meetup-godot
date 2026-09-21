@@ -891,7 +891,8 @@ async function mapProject(args) {
 
 async function launchBlender(args) {
   const authoring = args.includes("--authoring");
-  args = args.filter((arg) => arg !== "--authoring");
+  const buildAvatarProofs = args.includes("--build-avatar-proofs") || args.includes("--build-wardrobe-proof");
+  args = args.filter((arg) => arg !== "--authoring" && arg !== "--build-avatar-proofs" && arg !== "--build-wardrobe-proof");
   const override = String(process.env.BLENDER_BIN ?? "").trim();
   const executable = override || "blender";
   const probe = spawnSync(executable, ["--version"], { encoding: "utf8", windowsHide: true });
@@ -900,13 +901,25 @@ async function launchBlender(args) {
   }
   print(probe.stdout.split(/\r?\n/)[0]);
   if (args.includes("--check")) return;
+  if (authoring && buildAvatarProofs) fail("Choose either an interactive authoring session or a background avatar-proof build.");
+  if (buildAvatarProofs && args.length) fail("The avatar-proof builder does not accept a Blend file.");
   if (args.length > 1 || (args.length && !args[0].toLowerCase().endsWith(".blend"))) {
-    fail("Usage: node dev/dev.mjs blender [file.blend | --check]");
+    fail("Usage: node dev/dev.mjs blender [file.blend | --check | --build-avatar-proofs]");
   }
   const files = args.length ? [path.resolve(repositoryRoot, args[0])] : [];
   if (files.length && !(await pathExists(files[0]))) fail("The selected .blend file does not exist.");
   await new Promise((resolve, reject) => {
-    const launchArgs = authoring ? [...files, "--python", path.join(repositoryRoot, "dev", "blender_startup.py")] : files;
+    let launchArgs = files;
+    if (authoring) {
+      launchArgs = [...files, "--python", path.join(repositoryRoot, "dev", "blender_startup.py")];
+    } else if (buildAvatarProofs) {
+      launchArgs = [
+        "--background",
+        "--factory-startup",
+        "--python", path.join(repositoryRoot, "dev", "blender_startup.py"),
+        "--python", path.join(repositoryRoot, "dev", "blender", "build_avatar_proofs.py"),
+      ];
+    }
     const child = spawn(executable, launchArgs, {
       cwd: repositoryRoot,
       env: { ...process.env, DISABLE_TELEMETRY: "true" },
@@ -933,7 +946,7 @@ function usage() {
   print("  map-project [root]        Serve the MCP project map; add --open for a browser");
   print("  start                     Run the shared headless MCP editor");
   print("  editor                    Run the visible pinned editor");
-  print("  blender [file.blend]       Open Blender; --check verifies discovery only");
+  print("  blender [file.blend]       Open Blender; --check verifies discovery; --build-avatar-proofs builds both avatar proofs");
   print("  import                    Import project assets headlessly and exit");
   print("  check                     Load first-party scripts/scenes/resources and exit");
   print("  game-headless [scene]     Run a bounded headless scene smoke test");

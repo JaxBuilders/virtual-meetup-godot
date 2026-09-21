@@ -3,8 +3,8 @@ extends Resource
 
 const BODY_IDS := [&"body_compact", &"body_tall"]
 const SKIN_IDS := [&"skin_amber", &"skin_umber", &"skin_rose", &"skin_sand", &"skin_brown", &"skin_deep"]
-const HAIR_IDS := [&"hair_crop", &"hair_cap", &"hair_bun"]
-const OUTFIT_IDS := [&"outfit_teal", &"outfit_orange", &"outfit_violet"]
+const HAIR_IDS := [&"hair_crop", &"hair_cap", &"hair_bun", &"hair_bald"]
+const OUTFIT_IDS := [&"outfit_teal", &"outfit_orange", &"outfit_violet", &"outfit_charcoal", &"outfit_cream"]
 const ACCESSORY_IDS := [&"none", &"glasses", &"badge"]
 
 @export var body_id: StringName = BODY_IDS[0]

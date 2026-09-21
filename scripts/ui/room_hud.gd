@@ -214,7 +214,7 @@ func _build_room_menu() -> PanelContainer:
 	avatar.name = "Avatar"
 	tabs.add_child(avatar)
 	profile_controls = ProfileAvatarControlsScript.new()
-	profile_controls.configure(true, true, "Apply avatar")
+	profile_controls.configure(true, true)
 	profile_controls.submitted.connect(func(display_name: String, avatar_descriptor: AvatarDescriptor) -> void: profile_submitted.emit(display_name, avatar_descriptor))
 	avatar.add_child(profile_controls)
 	var settings := VBoxContainer.new()
